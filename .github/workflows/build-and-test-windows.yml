@@ -1,0 +1,38 @@
+name: Run Qt Tests (Windows)
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        qt-version: [5.15.2, 6.8.3]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '${{ matrix.qt-version }}'
+
+    - name: Set up build tools
+      # On windows-latest, Visual Studio and CMake are pre-installed, so usually nothing is needed.
+      run: |
+        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' --no-progress
+      shell: powershell
+
+    - name: Build project
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DQTMODELSTOOLKIT_BUILD_DEMO_APP=ON -DQTMODELSTOOLKIT_BUILD_TESTS=ON
+        cmake --build . --config Debug -j
+      shell: powershell
+
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure --test-dir tests -C Debug
+      shell: powershell

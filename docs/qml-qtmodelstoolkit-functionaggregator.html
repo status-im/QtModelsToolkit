@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- functionaggregator.cpp -->
+  <title>FunctionAggregator QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">FunctionAggregator QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$FunctionAggregator-brief -->
+<p>Aggregator calculating value using provided function. <a href="#details">More...</a></p>
+<!-- @@@FunctionAggregator -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <p><a href="qml-qtmodelstoolkit-singleroleaggregator.html">SingleRoleAggregator</a></p>
+</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-functionaggregator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-functionaggregator.html#aggregateFunction-prop">aggregateFunction</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-functionaggregator.html#initialValue-prop">initialValue</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-functionaggregator.html#model-prop">model</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-functionaggregator.html#roleName-prop">roleName</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-functionaggregator.html#value-prop">value</a></b></b> : any</li>
+</ul>
+<!-- $$$FunctionAggregator-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>In the following example <code>symbolsAggregator</code> provides list of symbols <code>[&quot;SNT&quot;, &quot;ETH&quot;, &quot;ZRX&quot;]</code>. The second instance <code>symbolsAggregator</code> computes maximum value of role <code>balance</code> (24).</p>
+<pre class="qml">ListModel {
+    id: sourceModel
+
+    ListElement {
+        symbol: &quot;SNT&quot;
+        balance: &quot;4&quot;
+    }
+    ListElement {
+        symbol: &quot;ETH&quot;
+        balance: &quot;14&quot;
+    }
+    ListElement {
+        symbol: &quot;ZRX&quot;
+        balance: &quot;24&quot;
+    }
+}
+
+FunctionAggregator {
+    id: symbolsAggregator
+
+    model: sourceModel
+    initialValue: []
+    roleName: &quot;symbol&quot;
+
+    aggregateFunction: (aggr, value) =&gt; [...aggr, value]
+}
+
+FunctionAggregator {
+    id: maxBalanceAggregator
+
+    model: sourceModel
+    initialValue: &quot;0&quot;
+    roleName: &quot;balance&quot;
+
+    aggregateFunction: (aggr, value) =&gt; Math.max(aggr, value)
+}</pre>
+<!-- @@@FunctionAggregator -->
+<h2>Property Documentation</h2>
+<!-- $$$aggregateFunction -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="aggregateFunction-prop">
+<td class="tblQmlPropNode"><p>
+<a name="aggregateFunction-prop"></a><span class="name">aggregateFunction</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Initial value used to compute aggregation.</p>
+</div></div><!-- @@@aggregateFunction -->
+<br/>
+<!-- $$$initialValue -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="initialValue-prop">
+<td class="tblQmlPropNode"><p>
+<a name="initialValue-prop"></a><span class="name">initialValue</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Initial value used to compute aggregation.</p>
+</div></div><!-- @@@initialValue -->
+<br/>
+<!-- $$$model -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="model-prop">
+<td class="tblQmlPropNode"><p>
+<a name="model-prop"></a><span class="name">model</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The source model used for aggregation.</p>
+</div></div><!-- @@@model -->
+<br/>
+<!-- $$$roleName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="roleName-prop">
+<td class="tblQmlPropNode"><p>
+<a name="roleName-prop"></a><span class="name">roleName</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Name of the role used for aggregation.</p>
+</div></div><!-- @@@roleName -->
+<br/>
+<!-- $$$value -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="value-prop">
+<td class="tblQmlPropNode"><p>
+<a name="value-prop"></a><span class="name">value</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The value computed from the model.</p>
+</div></div><!-- @@@value -->
+<br/>
+</body>
+</html>

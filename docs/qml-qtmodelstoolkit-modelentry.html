@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- modelentry.cpp -->
+  <title>ModelEntry QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ModelEntry QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ModelEntry-brief -->
+<p>Utility allowing handy binding to a single row from a model. <a href="#details">More...</a></p>
+<!-- @@@ModelEntry -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-modelentry-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-modelentry.html#available-prop">available</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-modelentry.html#cacheOnRemoval-prop">cacheOnRemoval</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-modelentry.html#item-prop">item</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-modelentry.html#itemRemovedFromModel-prop">itemRemovedFromModel</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-modelentry.html#key-prop">key</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-modelentry.html#roles-prop">roles</a></b></b> : list&lt;string&gt;</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-modelentry.html#row-prop">row</a></b></b> : int</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-modelentry.html#sourceModel-prop">sourceModel</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-modelentry.html#value-prop">value</a></b></b> : any</li>
+</ul>
+<!-- $$$ModelEntry-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>In opposition to accessing model data via methods like <code>ListModel::get</code> or <code>QAbstractItemModel::data</code>, <a href="qml-qtmodelstoolkit-modelentry.html">ModelEntry</a> gives ability to conveniently bind to the pointed element.</p>
+<!-- @@@ModelEntry -->
+<h2>Property Documentation</h2>
+<!-- $$$available -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="available-prop">
+<td class="tblQmlPropNode"><p>
+<a name="available-prop"></a><span class="name">available</span> : <span class="type">bool</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Determines whether the item is available.</p>
+</div></div><!-- @@@available -->
+<br/>
+<!-- $$$cacheOnRemoval -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="cacheOnRemoval-prop">
+<td class="tblQmlPropNode"><p>
+<a name="cacheOnRemoval-prop"></a><span class="name">cacheOnRemoval</span> : <span class="type">bool</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Determines whether to cache the item when it is removed from the model. If true, the item will be cached and available until another source model is used or the cacheOnRemoval is set to false.</p>
+</div></div><!-- @@@cacheOnRemoval -->
+<br/>
+<!-- $$$item -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="item-prop">
+<td class="tblQmlPropNode"><p>
+<a name="item-prop"></a><span class="name">item</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The item found in the source model</p>
+</div></div><!-- @@@item -->
+<br/>
+<!-- $$$itemRemovedFromModel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="itemRemovedFromModel-prop">
+<td class="tblQmlPropNode"><p>
+<a name="itemRemovedFromModel-prop"></a><span class="name">itemRemovedFromModel</span> : <span class="type">bool</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Determines whether the item was removed from the model. This flag is only set when <a href="qml-qtmodelstoolkit-modelentry.html#cacheOnRemoval-prop">cacheOnRemoval</a> is true.</p>
+</div></div><!-- @@@itemRemovedFromModel -->
+<br/>
+<!-- $$$key -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="key-prop">
+<td class="tblQmlPropNode"><p>
+<a name="key-prop"></a><span class="name">key</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The key role used to search for the item.</p>
+</div></div><!-- @@@key -->
+<br/>
+<!-- $$$roles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="roles-prop">
+<td class="tblQmlPropNode"><p>
+<a name="roles-prop"></a><span class="name">roles</span> : <span class="type">list</span>&lt;<span class="type">string</span>&gt;</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Holds the roles of the item.</p>
+</div></div><!-- @@@roles -->
+<br/>
+<!-- $$$row -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="row-prop">
+<td class="tblQmlPropNode"><p>
+<a name="row-prop"></a><span class="name">row</span> : <span class="type">int</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The row of the item in the source model, -1 if not available or removed.</p>
+</div></div><!-- @@@row -->
+<br/>
+<!-- $$$sourceModel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="sourceModel-prop">
+<td class="tblQmlPropNode"><p>
+<a name="sourceModel-prop"></a><span class="name">sourceModel</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The source model to get the item from.</p>
+</div></div><!-- @@@sourceModel -->
+<br/>
+<!-- $$$value -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="value-prop">
+<td class="tblQmlPropNode"><p>
+<a name="value-prop"></a><span class="name">value</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>The value role used to cache the item.</p>
+</div></div><!-- @@@value -->
+<br/>
+</body>
+</html>

@@ -1,0 +1,27 @@
+/*!
+    \page index.html overview
+
+    \title QtModelsToolkit QML Module
+
+    QtModelsToolkit is a set of proxy models and other qt models-related utilities.
+
+    \section1 Proxy models
+    \annotatedlist ProxyModels
+
+    \section2 Proxy models - associated types
+    \annotatedlist ProxyModelsAssociated
+
+    \section1 Aggregators
+    \annotatedlist Aggregators
+
+    \section1 Utilities
+    \annotatedlist Utilities
+*/
+
+/*!
+    \qmlmodule QtModelsToolkit
+*/
+
+/*!
+    \module QtModelsToolkit
+*/

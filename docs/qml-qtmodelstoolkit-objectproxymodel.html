@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- objectproxymodel.cpp -->
+  <title>ObjectProxyModel QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ObjectProxyModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ObjectProxyModel-brief -->
+<p>Proxy model using QML delegate to transform source model. <a href="#details">More...</a></p>
+<!-- @@@ObjectProxyModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-objectproxymodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-objectproxymodel.html#delegate-prop">delegate</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-objectproxymodel.html#expectedRoles-prop">expectedRoles</a></b></b> : list&lt;string&gt;</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-objectproxymodel.html#exposedRoles-prop">exposedRoles</a></b></b> : list&lt;string&gt;</li>
+</ul>
+<!-- $$$ObjectProxyModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>This proxy creates object from provided delegate component for every row. The delegate's instance can access data from source model and expose properties as new roles.</p>
+<p>ObjectProxyModel may transform not only plain types but also complex types as submodels:</p>
+<pre class="qml"><span class="type"><a href="qml-qtmodelstoolkit-objectproxymodel.html">ObjectProxyModel</a></span> {
+    <span class="name">sourceModel</span>: <span class="name">tokensModel</span>
+
+    <span class="name">delegate</span>: <span class="name">SortFilterProxyModel</span> {
+        <span class="name">id</span>: <span class="name">delegateRoot</span>
+
+        readonly property <span class="type">int</span> <span class="name">balancesCount</span>: <span class="name">model</span>.<span class="name">balances</span>.<span class="name">ModelCount</span>.<span class="name">count</span>
+        readonly property <span class="type">int</span> <span class="name">sum</span>: <span class="name">aggregator</span>.<span class="name">value</span>
+        readonly property <span class="type">SortFilterProxyModel</span> <span class="name">balances</span>: this
+
+        <span class="name">sourceModel</span>: <span class="name">model</span>.<span class="name">balances</span>
+
+        <span class="name">filters</span>: <span class="name">ExpressionFilter</span> {
+            <span class="name">expression</span>: <span class="name">balance</span> <span class="operator">&gt;=</span> <span class="name">thresholdSlider</span>.<span class="name">value</span>
+        }
+
+        readonly property <span class="type"><a href="qml-qtmodelstoolkit-sumaggregator.html">SumAggregator</a></span> <span class="name">aggregator</span>: <span class="name">SumAggregator</span> {
+            <span class="name">id</span>: <span class="name">aggregator</span>
+
+            <span class="name">model</span>: <span class="name">delegateRoot</span>
+            <span class="name">roleName</span>: <span class="string">&quot;balance&quot;</span>
+        }
+    }
+
+    <span class="name">exposedRoles</span>: [<span class="string">&quot;balances&quot;</span>, <span class="string">&quot;balancesCount&quot;</span>, <span class="string">&quot;sum&quot;</span>]
+    <span class="name">expectedRoles</span>: [<span class="string">&quot;balances&quot;</span>]
+}</pre>
+<p>In this example, submodel &quot;balances&quot; from source model is filtered to keep only values higher or equal to a given threshold. Then it's exposed via &quot;balances&quot; property, overriding original role. Additionally new roles are exposed:</p>
+<ul>
+<li>sum - sum of all balances</li>
+<li>balancesCount - row count of the submodel</li>
+</ul>
+<!-- @@@ObjectProxyModel -->
+<h2>Property Documentation</h2>
+<!-- $$$delegate -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="delegate-prop">
+<td class="tblQmlPropNode"><p>
+<a name="delegate-prop"></a><span class="name">delegate</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the component created for every row of the source model in order to transform the source data in-place, overriding existing roles, or/and by exposing new roles.</p>
+</div></div><!-- @@@delegate -->
+<br/>
+<!-- $$$expectedRoles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="expectedRoles-prop">
+<td class="tblQmlPropNode"><p>
+<a name="expectedRoles-prop"></a><span class="name">expectedRoles</span> : <span class="type">list</span>&lt;<span class="type">string</span>&gt;</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the names of roles that are intended to be available within the delegate's instances.</p>
+</div></div><!-- @@@expectedRoles -->
+<br/>
+<!-- $$$exposedRoles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="exposedRoles-prop">
+<td class="tblQmlPropNode"><p>
+<a name="exposedRoles-prop"></a><span class="name">exposedRoles</span> : <span class="type">list</span>&lt;<span class="type">string</span>&gt;</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the names of roles that are exposed from the model. Those names must match names of properties defined in a delegate, as those properties are data source of those roles.</p>
+</div></div><!-- @@@exposedRoles -->
+<br/>
+</body>
+</html>

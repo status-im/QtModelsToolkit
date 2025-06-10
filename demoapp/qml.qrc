@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>ConcatModelPage.qml</file>
+        <file>GroupingModelPage.qml</file>
+        <file>LeftJoinModelPage.qml</file>
+        <file>ModelEntryPage.qml</file>
+        <file>MovableModelPage.qml</file>
+        <file>ObjectProxyModelExample1.qml</file>
+        <file>ObjectProxyModelExample2.qml</file>
+        <file>ObjectProxyModelPage.qml</file>
+        <file>RolesRenamingModelPage.qml</file>
+        <file>WritableProxyModelPage.qml</file>
+        <file>MovableModelWithSfpmPage.qml</file>
+        <file>GenericListView.qml</file>
+        <file>UsersModel.qml</file>
+    </qresource>
+</RCC>

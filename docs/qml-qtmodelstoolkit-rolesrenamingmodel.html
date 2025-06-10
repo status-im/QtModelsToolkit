@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- rolesrenamingmodel.cpp -->
+  <title>RolesRenamingModel QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">RolesRenamingModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$RolesRenamingModel-brief -->
+<p>Simple proxy allowing to rename roles according to a provided mapping. <a href="#details">More...</a></p>
+<!-- @@@RolesRenamingModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-rolesrenamingmodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-rolesrenamingmodel.html#mapping-prop">mapping</a></b></b> : list&lt;RoleName&gt;</li>
+</ul>
+<!-- $$$RolesRenamingModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>In the following example original roles <code>key</code> and <code>title</code> are renamed to <code>id</code> and <code>name</code>, respectively.</p>
+<pre class="qml"><span class="type"><a href="qml-qtmodelstoolkit-rolesrenamingmodel.html">RolesRenamingModel</a></span> {
+    <span class="name">id</span>: <span class="name">renamedModel</span>
+
+    <span class="name">sourceModel</span>: <span class="name">sourceModel</span>
+
+    <span class="name">mapping</span>: [
+        <span class="type"><a href="qml-qtmodelstoolkit-rolerename.html">RoleRename</a></span> {
+            <span class="name">from</span>: <span class="string">&quot;key&quot;</span>
+            <span class="name">to</span>: <span class="string">&quot;id&quot;</span>
+        },
+        <span class="type"><a href="qml-qtmodelstoolkit-rolerename.html">RoleRename</a></span> {
+            <span class="name">from</span>: <span class="string">&quot;title&quot;</span>
+            <span class="name">to</span>: <span class="string">&quot;name&quot;</span>
+        }
+    ]
+}</pre>
+<!-- @@@RolesRenamingModel -->
+<h2>Property Documentation</h2>
+<!-- $$$mapping -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="mapping-prop">
+<td class="tblQmlPropNode"><p>
+<a name="mapping-prop"></a><span class="name">mapping</span> : <span class="type">list</span>&lt;<span class="type">RoleName</span>&gt;</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the mapping as a list of <a href="qml-qtmodelstoolkit-rolerename.html">RoleRename</a> objects.</p>
+</div></div><!-- @@@mapping -->
+<br/>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- groupingmodel.cpp -->
+  <title>GroupingModel QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">GroupingModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$GroupingModel-brief -->
+<p>Proxy model grouping rows into submodels by value of given role. <a href="#details">More...</a></p>
+<!-- @@@GroupingModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-groupingmodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-groupingmodel.html#groupingRoleName-prop">groupingRoleName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-groupingmodel.html#submodelRoleName-prop">submodelRoleName</a></b></b> : string</li>
+</ul>
+<!-- $$$GroupingModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>The proxy groups consecutive rows with the same value of role <a href="qml-qtmodelstoolkit-groupingmodel.html#groupingRoleName-prop">groupingRoleName</a> into submodel and exposed under role name <a href="qml-qtmodelstoolkit-groupingmodel.html#submodelRoleName-prop">submodelRoleName</a>. Only the first row from the group remains in the top-level model (with additional role holding the grouped submodel).</p>
+<!-- @@@GroupingModel -->
+<h2>Property Documentation</h2>
+<!-- $$$groupingRoleName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="groupingRoleName-prop">
+<td class="tblQmlPropNode"><p>
+<a name="groupingRoleName-prop"></a><span class="name">groupingRoleName</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the role name that the sorter is proxy is using group rows of the source model.</p>
+</div></div><!-- @@@groupingRoleName -->
+<br/>
+<!-- $$$submodelRoleName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="submodelRoleName-prop">
+<td class="tblQmlPropNode"><p>
+<a name="submodelRoleName-prop"></a><span class="name">submodelRoleName</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the role name that is used to expose the submodel with groupped rows.</p>
+</div></div><!-- @@@submodelRoleName -->
+<br/>
+</body>
+</html>

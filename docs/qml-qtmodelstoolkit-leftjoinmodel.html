@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- leftjoinmodel.cpp -->
+  <title>LeftJoinModel QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">LeftJoinModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$LeftJoinModel-brief -->
+<p>Proxy model joining two models in a SQL LEFT JOIN fasion. <a href="#details">More...</a></p>
+<!-- @@@LeftJoinModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-leftjoinmodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-leftjoinmodel.html#joinRole-prop">joinRole</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-leftjoinmodel.html#leftModel-prop">leftModel</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-leftjoinmodel.html#rightModel-prop">rightModel</a></b></b> : any</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-leftjoinmodel.html#rolesToJoin-prop">rolesToJoin</a></b></b> : any</li>
+</ul>
+<!-- $$$LeftJoinModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>It allows joining two models similarly as two tables can be joined in SQL using LEFT JOIN operation. Established join is fully dynamic - all changes in source models are reflected in the output model.</p>
+<!-- @@@LeftJoinModel -->
+<h2>Property Documentation</h2>
+<!-- $$$joinRole -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="joinRole-prop">
+<td class="tblQmlPropNode"><p>
+<a name="joinRole-prop"></a><span class="name">joinRole</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the name of the role used for matching between left and right model. Both left and right models must contain role of that name.</p>
+</div></div><!-- @@@joinRole -->
+<br/>
+<!-- $$$leftModel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="leftModel-prop">
+<td class="tblQmlPropNode"><p>
+<a name="leftModel-prop"></a><span class="name">leftModel</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the left model used for the join. It's also base model because the proxy contains all data from the left model and the same row count.</p>
+</div></div><!-- @@@leftModel -->
+<br/>
+<!-- $$$rightModel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="rightModel-prop">
+<td class="tblQmlPropNode"><p>
+<a name="rightModel-prop"></a><span class="name">rightModel</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the right model used for the join. Only the rows that match the left model are used.</p>
+</div></div><!-- @@@rightModel -->
+<br/>
+<!-- $$$rolesToJoin -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="rolesToJoin-prop">
+<td class="tblQmlPropNode"><p>
+<a name="rolesToJoin-prop"></a><span class="name">rolesToJoin</span> : <span class="type">any</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the names of the roles intended to be joined from the right model. Those names must be different than role names of the left model.</p>
+</div></div><!-- @@@rolesToJoin -->
+<br/>
+</body>
+</html>

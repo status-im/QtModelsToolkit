@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- writableproxymodel.cpp -->
+  <title>WritableProxyModel QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">WritableProxyModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$WritableProxyModel-brief -->
+<p>Proxy allowing editing and removing entries from the source model. <a href="#details">More...</a></p>
+<!-- @@@WritableProxyModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-writableproxymodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-writableproxymodel.html#dirty-prop">dirty</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-writableproxymodel.html#syncedRemovals-prop">syncedRemovals</a></b></b> : bool</li>
+</ul>
+<!-- $$$WritableProxyModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>WritableProxyModel is a <code>QAbstractProxyModel</code> that allows you to modify the data without modifying the source model. It is useful for implementing a &quot;dirty&quot; state for a model, where you can modify the data and then commit the changes to the source model.</p>
+<p>Supported features (reimplemented):</p>
+<ul>
+<li><code>setData</code></li>
+<li><code>setItemData</code></li>
+<li><code>removeRows</code></li>
+<li><code>insertRows</code></li>
+<li><code>moveRows</code> (TODO)</li>
+<li><code>toVariantMap</code></li>
+<li>to be continued..&#x2e;</li>
+</ul>
+<p>Limitations:</p>
+<ul>
+<li>only 1 column (no grid models)</li>
+<li>no parent index (no tree models)</li>
+</ul>
+<!-- @@@WritableProxyModel -->
+<h2>Property Documentation</h2>
+<!-- $$$dirty -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="dirty-prop">
+<td class="tblQmlPropNode"><p>
+<a name="dirty-prop"></a><span class="name">dirty</span> : <span class="type">bool</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Indicates if the proxy was modified.</p>
+</div></div><!-- @@@dirty -->
+<br/>
+<!-- $$$syncedRemovals -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="syncedRemovals-prop">
+<td class="tblQmlPropNode"><p>
+<a name="syncedRemovals-prop"></a><span class="name">syncedRemovals</span> : <span class="type">bool</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>If true, the removals are synced with the source model. Removing an edited item from source will also remove it from proxy. If false, eemoving an edited item from source will not remove it from proxy. It will become a newly inserted row</p>
+</div></div><!-- @@@syncedRemovals -->
+<br/>
+</body>
+</html>

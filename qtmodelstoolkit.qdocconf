@@ -1,0 +1,14 @@
+project = QtModelsToolkit
+
+sourcedirs = toolkit/src
+headerdirs = toolkit/include
+
+sources.fileextensions = "*.cpp *.qdoc *.qml"
+headers.fileextensions = "*.h"
+
+outputdir = docs/
+
+HTML.templatedir = .
+HTML.stylesheets = "docs-styling.css"
+
+HTML.headerstyles = "  <link rel=\"stylesheet\" type=\"text/css\" href=\"style/docs-styling.css\" />\n"

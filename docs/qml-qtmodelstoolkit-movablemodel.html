@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- movablemodel.cpp -->
+  <title>MovableModel QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MovableModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$MovableModel-brief -->
+<p>Proxy model allowing freely reorder rows without modifying the source model. <a href="#details">More...</a></p>
+<!-- @@@MovableModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-movablemodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-movablemodel.html#synced-prop">synced</a></b></b> : bool</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">void <b><b><a href="qml-qtmodelstoolkit-movablemodel.html#desyncOrder-method">desyncOrder</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtmodelstoolkit-movablemodel.html#move-method">move</a></b></b>(<i>from</i>, <i>to</i>, <i>count</i>)</li>
+<li class="fn">list&lt;int&gt; <b><b><a href="qml-qtmodelstoolkit-movablemodel.html#order-method">order</a></b></b>()</li>
+<li class="fn">void <b><b><a href="qml-qtmodelstoolkit-movablemodel.html#syncOrder-method">syncOrder</a></b></b>()</li>
+</ul>
+<!-- $$$MovableModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<!-- @@@MovableModel -->
+<h2>Property Documentation</h2>
+<!-- $$$synced -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="synced-prop">
+<td class="tblQmlPropNode"><p>
+<a name="synced-prop"></a><span class="name">synced</span> : <span class="type">bool</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This read-only properties specifies if the rows order of the proxy is synced with the rows order of the source model. When true, rows moves of the source model are directly reflected in the proxy model.</p>
+<p>Synced property becomes false when <a href="qml-qtmodelstoolkit-movablemodel.html#move-method">move</a> or <a href="qml-qtmodelstoolkit-movablemodel.html#desyncOrder-method">desyncOrder</a> are called.</p>
+</div></div><!-- @@@synced -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$desyncOrder[overload1]$$$desyncOrder -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="desyncOrder-method">
+<td class="tblQmlFuncNode"><p>
+<a name="desyncOrder-method"></a><span class="type">void</span> <span class="name">desyncOrder</span>()</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Explicitly desynchronize order. It means that reorders within source model won't be reflected in the proxy.</p>
+</div></div><!-- @@@desyncOrder -->
+<br/>
+<!-- $$$move[overload1]$$$move -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="move-method">
+<td class="tblQmlFuncNode"><p>
+<a name="move-method"></a><span class="type">void</span> <span class="name">move</span>(<i>from</i>, <i>to</i>, <i>count</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Moves rows in the same way as ListModel::move.</p>
+</div></div><!-- @@@move -->
+<br/>
+<!-- $$$order[overload1]$$$order -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="order-method">
+<td class="tblQmlFuncNode"><p>
+<a name="order-method"></a><span class="type">list</span>&lt;<span class="type">int</span>&gt; <span class="name">order</span>()</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns list where every entry indicates position of given index of a proxy in a source model.</p>
+</div></div><!-- @@@order -->
+<br/>
+<!-- $$$syncOrder[overload1]$$$syncOrder -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="syncOrder-method">
+<td class="tblQmlFuncNode"><p>
+<a name="syncOrder-method"></a><span class="type">void</span> <span class="name">syncOrder</span>()</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Restores the order of the source in a proxy and marks the proxy as synced.</p>
+</div></div><!-- @@@syncOrder -->
+<br/>
+</body>
+</html>

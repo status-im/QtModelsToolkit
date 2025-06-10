@@ -1,0 +1,35 @@
+name: Run Qt Tests (Linux)
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        qt-version: [5.15.2, 6.8.3]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '${{ matrix.qt-version }}'
+
+    - name: Set up build tools
+      run: sudo apt-get update && sudo apt-get install -y build-essential cmake
+
+    - name: Build project
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DQTMODELSTOOLKIT_BUILD_DEMO_APP=ON -DQTMODELSTOOLKIT_BUILD_TESTS=ON
+        cmake --build . -j
+
+    - name: Run tests
+      env:
+        QT_QPA_PLATFORM: "offscreen"
+      run: |
+        cd build
+        ctest --output-on-failure --test-dir tests

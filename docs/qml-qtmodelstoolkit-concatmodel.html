@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- concatmodel.cpp -->
+  <title>ConcatModel QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#properties">Properties</a></li>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ConcatModel QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ConcatModel-brief -->
+<p>Proxy model concatenating vertically multiple source models. <a href="#details">More...</a></p>
+<!-- @@@ConcatModel -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-concatmodel-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="properties"></a>
+<h2 id="properties">Properties</h2>
+<ul>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-concatmodel.html#expectedRoles-prop">expectedRoles</a></b></b> : list&lt;string&gt;</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-concatmodel.html#markerRoleName-prop">markerRoleName</a></b></b> : string</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-concatmodel.html#propagateResets-prop">propagateResets</a></b></b> : bool</li>
+<li class="fn"><b><b><a href="qml-qtmodelstoolkit-concatmodel.html#sources-prop">sources</a></b></b> : list&lt;SourceModel&gt;</li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">int <b><b><a href="qml-qtmodelstoolkit-concatmodel.html#fromSourceRow-method">fromSourceRow</a></b></b>(<i>model</i>, <i>row</i>)</li>
+<li class="fn">QAbstractItemModel*<b><b><a href="qml-qtmodelstoolkit-concatmodel.html#sourceModel-method">sourceModel</a></b></b>(<i>row</i>)</li>
+<li class="fn">int <b><b><a href="qml-qtmodelstoolkit-concatmodel.html#sourceModelRow-method">sourceModelRow</a></b></b>(<i>row</i>)</li>
+</ul>
+<!-- $$$ConcatModel-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<p>It allows concatenating multiple source models, with same roles, partially different roles or even totally different roles. The model performs necessary roles mapping internally.</p>
+<p>The proxy is similar to QConcatenateTablesProxyModel but QML-ready, performing all necessary role names remapping.</p>
+<p>Roles are established when the first item appears in one of the sources. Expected roles can be also declared up-front using <a href="qml-qtmodelstoolkit-concatmodel.html#expectedRoles-prop">expectedRoles</a> property (because on first insertion some roles may be not yet available via roleNames() on other models).</p>
+<p>Additionally the model introduces an extra role with a name configurable via <a href="qml-qtmodelstoolkit-concatmodel.html#markerRoleName-prop">ConcatModel::markerRoleName</a>. Value of this role may be set separately for each source model in <a href="qml-qtmodelstoolkit-sourcemodel.html">SourceModel</a> wrapper. This allows to easily create inserts between models using ListView's sections mechanism.</p>
+<pre class="qml">ListModel {
+    id: firstModel
+
+    ListElement { name: &quot;entry 1_1&quot; }
+    ListElement { name: &quot;entry 1_2&quot; }
+    ListElement { name: &quot;entry 1_3&quot; }
+}
+
+ListModel {
+    id: secondModel
+
+    ListElement {
+        name: &quot;entry 1_2&quot;
+        key: 1
+    }
+    ListElement {
+        key: 2
+        name: &quot;entry 2 _2&quot;
+    }
+}
+
+ConcatModel {
+    id: concatModel
+
+    sources: [
+        SourceModel {
+            model: firstModel
+            markerRoleValue: &quot;first_model&quot;
+        },
+        SourceModel {
+            model: secondModel
+            markerRoleValue: &quot;second_model&quot;
+        }
+    ]
+
+    markerRoleName: &quot;which_model&quot;
+    expectedRoles: [&quot;key&quot;, &quot;name&quot;]
+}</pre>
+<!-- @@@ConcatModel -->
+<h2>Property Documentation</h2>
+<!-- $$$expectedRoles -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="expectedRoles-prop">
+<td class="tblQmlPropNode"><p>
+<a name="expectedRoles-prop"></a><span class="name">expectedRoles</span> : <span class="type">list</span>&lt;<span class="type">string</span>&gt;</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property allows to predefine a set of roles exposed by <a href="qml-qtmodelstoolkit-concatmodel.html">ConcatModel</a>. This is useful when roles are not initially defined for some source models. For example, for ListModel, roles are not defined as long as the model is empty.</p>
+</div></div><!-- @@@expectedRoles -->
+<br/>
+<!-- $$$markerRoleName -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="markerRoleName-prop">
+<td class="tblQmlPropNode"><p>
+<a name="markerRoleName-prop"></a><span class="name">markerRoleName</span> : <span class="type">string</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property contains the name of an extra role allowing to distinguish source models from the delegate level.</p>
+</div></div><!-- @@@markerRoleName -->
+<br/>
+<!-- $$$propagateResets -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="propagateResets-prop">
+<td class="tblQmlPropNode"><p>
+<a name="propagateResets-prop"></a><span class="name">propagateResets</span> : <span class="type">bool</span></p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>When set to true, model resets on source models result in model reset of the <a href="qml-qtmodelstoolkit-concatmodel.html">ConcatModel</a>. Otherwise model resets of sources are handled as removals and insertions. Default is false.</p>
+</div></div><!-- @@@propagateResets -->
+<br/>
+<!-- $$$sources -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="sources-prop">
+<td class="tblQmlPropNode"><p>
+<a name="sources-prop"></a><span class="name">sources</span> : <span class="type">list</span>&lt;<span class="type"><a href="qml-qtmodelstoolkit-sourcemodel.html">SourceModel</a></span>&gt;</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>This property holds the list of <a href="qml-qtmodelstoolkit-sourcemodel.html">SourceModel</a> wrappers. Every wrapper holds model which is intended to be concatenated with others within the proxy.</p>
+</div></div><!-- @@@sources -->
+<br/>
+<h2>Method Documentation</h2>
+<!-- $$$fromSourceRow[overload1]$$$fromSourceRow -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="fromSourceRow-method">
+<td class="tblQmlFuncNode"><p>
+<a name="fromSourceRow-method"></a><span class="type">int</span> <span class="name">fromSourceRow</span>(<i>model</i>, <i>row</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns the row number of the <a href="qml-qtmodelstoolkit-concatmodel.html">ConcatModel</a> for a given source <i>model</i> and source model's <i>row</i> index.</p>
+</div></div><!-- @@@fromSourceRow -->
+<br/>
+<!-- $$$sourceModel[overload1]$$$sourceModel -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="sourceModel-method">
+<td class="tblQmlFuncNode"><p>
+<a name="sourceModel-method"></a><span class="type">QAbstractItemModel</span>*<span class="name">sourceModel</span>(<i>row</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns the source model for a given <i>row</i> of the proxy.</p>
+</div></div><!-- @@@sourceModel -->
+<br/>
+<!-- $$$sourceModelRow[overload1]$$$sourceModelRow -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="sourceModelRow-method">
+<td class="tblQmlFuncNode"><p>
+<a name="sourceModelRow-method"></a><span class="type">int</span> <span class="name">sourceModelRow</span>(<i>row</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns the row index inside the source model for a given <i>row</i> of the proxy.</p>
+</div></div><!-- @@@sourceModelRow -->
+<br/>
+</body>
+</html>

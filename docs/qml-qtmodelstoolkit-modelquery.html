@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- modelquery.cpp -->
+  <title>ModelQuery QML Type | QtModelsToolkit</title>
+  <link rel="stylesheet" type="text/css" href="style/docs-styling.css" />
+</head>
+<body>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">ModelQuery QML Type</h1>
+<span class="subtitle"></span>
+<!-- $$$ModelQuery-brief -->
+<p>Set of methods for querying QAbstractItemModel-based models. <a href="#details">More...</a></p>
+<!-- @@@ModelQuery -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import QtModelsToolkit .</td></tr></table></div><ul>
+<li><a href="qml-qtmodelstoolkit-modelquery-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li class="fn">int <b><b><a href="qml-qtmodelstoolkit-modelquery.html#contains-method">contains</a></b></b>(var <i>model</i>, string <i>roleName</i>, var <i>value</i>, int <i>mode</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtmodelstoolkit-modelquery.html#get-method-1">get</a></b></b>(var <i>model</i>, string <i>roleName</i>)</li>
+<li class="fn">object <b><b><a href="qml-qtmodelstoolkit-modelquery.html#get-method">get</a></b></b>(var <i>model</i>, string <i>roleName</i>)</li>
+<li class="fn">int <b><b><a href="qml-qtmodelstoolkit-modelquery.html#indexOf-method-1">indexOf</a></b></b>(var <i>model</i>, int <i>row</i>)</li>
+<li class="fn">int <b><b><a href="qml-qtmodelstoolkit-modelquery.html#indexOf-method">indexOf</a></b></b>(var <i>model</i>, string <i>roleName</i>, var <i>value</i>)</li>
+<li class="fn">bool <b><b><a href="qml-qtmodelstoolkit-modelquery.html#isModel-method">isModel</a></b></b>(var <i>obj</i>)</li>
+<li class="fn">int <b><b><a href="qml-qtmodelstoolkit-modelquery.html#roleByName-method">roleByName</a></b></b>(var <i>model</i>, string <i>roleName</i>)</li>
+<li class="fn">list&lt;string&gt; <b><b><a href="qml-qtmodelstoolkit-modelquery.html#roleNames-method">roleNames</a></b></b>(var <i>model</i>)</li>
+</ul>
+<!-- $$$ModelQuery-description -->
+<a name="details"></a>
+<h2 id="details">Detailed Description</h2>
+<!-- @@@ModelQuery -->
+<h2>Method Documentation</h2>
+<!-- $$$contains[overload1]$$$containsvarstringvarint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="contains-method">
+<td class="tblQmlFuncNode"><p>
+<a name="contains-method"></a><span class="type">int</span> <span class="name">contains</span>(<span class="type">var</span> <i>model</i>, <span class="type">string</span> <i>roleName</i>, <span class="type">var</span> <i>value</i>, <span class="type">int</span> <i>mode</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Checks if <i>model</i> contains given <i>value</i> for a <i>roleName</i>.</p>
+<p><i>mode</i> can be <code>Qt.CaseSensitive</code> or <code>Qt.CaseInsensitive</code>.</p>
+</div></div><!-- @@@contains -->
+<br/>
+<!-- $$$get$$$getvarstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="get-method-1">
+<td class="tblQmlFuncNode"><p>
+<a name="get-method-1"></a><span class="type">object</span> <span class="name">get</span>(<span class="type">var</span> <i>model</i>, <span class="type">string</span> <i>roleName</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns value for given <i>row</i> and <i>roleName</i> from a <i>model</i>.</p>
+</div></div><!-- @@@get -->
+<br/>
+<!-- $$$get[overload1]$$$getvarstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="get-method">
+<td class="tblQmlFuncNode"><p>
+<a name="get-method"></a><span class="type">object</span> <span class="name">get</span>(<span class="type">var</span> <i>model</i>, <span class="type">string</span> <i>roleName</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns values (map role name -&gt; value) for given <i>row</i> from a <i>model</i>.</p>
+</div></div><!-- @@@get -->
+<br/>
+<!-- $$$indexOf$$$indexOfvarint -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="indexOf-method-1">
+<td class="tblQmlFuncNode"><p>
+<a name="indexOf-method-1"></a><span class="type">int</span> <span class="name">indexOf</span>(<span class="type">var</span> <i>model</i>, <span class="type">int</span> <i>row</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns <code>QPersistentModelIndex</code> for a given <i>row</i>.</p>
+</div></div><!-- @@@indexOf -->
+<br/>
+<!-- $$$indexOf[overload1]$$$indexOfvarstringvar -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="indexOf-method">
+<td class="tblQmlFuncNode"><p>
+<a name="indexOf-method"></a><span class="type">int</span> <span class="name">indexOf</span>(<span class="type">var</span> <i>model</i>, <span class="type">string</span> <i>roleName</i>, <span class="type">var</span> <i>value</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns the index of given value of given value in the model using QAbstractItemModel::match method with <code>Qt::MatchExactly</code> flag.</p>
+<p><b>Note: </b><code>QAbstractItemModel::match</code> with <code>Qt::MatchExactly</code> flag performs <code>QVariant</code>-based matching internally. It means that types are not compared and e.g&#x2e; 4 (int) compared to string &quot;4&quot; will give a positive result.</p>
+</div></div><!-- @@@indexOf -->
+<br/>
+<!-- $$$isModel[overload1]$$$isModelvar -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="isModel-method">
+<td class="tblQmlFuncNode"><p>
+<a name="isModel-method"></a><span class="type">bool</span> <span class="name">isModel</span>(<span class="type">var</span> <i>obj</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Return true if obj is a model based on <code>QAbstractItemModel</code>.</p>
+</div></div><!-- @@@isModel -->
+<br/>
+<!-- $$$roleByName[overload1]$$$roleByNamevarstring -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="roleByName-method">
+<td class="tblQmlFuncNode"><p>
+<a name="roleByName-method"></a><span class="type">int</span> <span class="name">roleByName</span>(<span class="type">var</span> <i>model</i>, <span class="type">string</span> <i>roleName</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns value of the role for given <i>model</i> and <i>roleName</i>.</p>
+</div></div><!-- @@@roleByName -->
+<br/>
+<!-- $$$roleNames[overload1]$$$roleNamesvar -->
+<div class="qmlitem"><div class="qmlproto">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="roleNames-method">
+<td class="tblQmlFuncNode"><p>
+<a name="roleNames-method"></a><span class="type">list</span>&lt;<span class="type">string</span>&gt; <span class="name">roleNames</span>(<span class="type">var</span> <i>model</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Return role names a string list for given <i>model</i>.</p>
+</div></div><!-- @@@roleNames -->
+<br/>
+</body>
+</html>
