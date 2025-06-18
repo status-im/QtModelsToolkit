@@ -12,7 +12,7 @@ class ChildAggregator : public Aggregator
     Q_OBJECT
 
 public:
-    explicit ChildAggregator(QObject* parent = nullptr) {}
+    explicit ChildAggregator(QObject* /*parent*/ = nullptr) {}
 
 protected slots:
     QVariant calculateAggregation() override

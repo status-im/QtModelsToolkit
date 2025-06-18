@@ -109,7 +109,7 @@ private slots:
         ModelSyncedContainer<int> container;
         container.setModel(model);
 
-        for (auto i = 0; i < container.size(); i++)
+        for (std::size_t i = 0; i < container.size(); i++)
             container[i] = i;
 
         model.append(QJsonArray {
@@ -132,7 +132,7 @@ private slots:
         ModelSyncedContainer<int> container;
         container.setModel(model);
 
-        for (auto i = 0; i < container.size(); i++)
+        for (std::size_t i = 0; i < container.size(); i++)
             container[i] = i;
 
         model.insert(2, QJsonArray {
@@ -155,7 +155,7 @@ private slots:
         ModelSyncedContainer<int> container;
         container.setModel(model);
 
-        for (auto i = 0; i < container.size(); i++)
+        for (std::size_t i = 0; i < container.size(); i++)
             container[i] = i;
 
         model.move(1, 0);
@@ -180,7 +180,7 @@ private slots:
         ModelSyncedContainer<int> container;
         container.setModel(model);
 
-        for (auto i = 0; i < container.size(); i++)
+        for (std::size_t i = 0; i < container.size(); i++)
             container[i] = i;
 
         model.move(0, 3, 3);
@@ -202,7 +202,7 @@ private slots:
         ModelSyncedContainer<int> container;
         container.setModel(model);
 
-        for (auto i = 0; i < container.size(); i++)
+        for (std::size_t i = 0; i < container.size(); i++)
             container[i] = i;
 
         model.remove(1, 2);
@@ -218,7 +218,7 @@ private slots:
         ModelSyncedContainer<int> container;
         container.setModel(&model);
 
-        for (auto i = 0; i < container.size(); i++)
+        for (std::size_t i = 0; i < container.size(); i++)
             container[i] = i;
 
         model.invert();
@@ -234,7 +234,7 @@ private slots:
         ModelSyncedContainer<int> container;
         container.setModel(&model);
 
-        for (auto i = 0; i < container.size(); i++)
+        for (std::size_t i = 0; i < container.size(); i++)
             container[i] = i;
 
         model.removeEverySecond();
@@ -250,7 +250,7 @@ private slots:
         ModelSyncedContainer<int> container;
         container.setModel(&model);
 
-        for (auto i = 0; i < container.size(); i++)
+        for (std::size_t i = 0; i < container.size(); i++)
             container[i] = i;
 
         model.reset();

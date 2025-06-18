@@ -153,7 +153,7 @@ void LeftJoinModel::connectLeftModelSignals()
     });
 
     connect(m_leftModel, &QAbstractItemModel::rowsInserted,
-            this, [this](const QModelIndex& parent, int first, int last) {
+            this, [this](const QModelIndex& parent, int /*first*/, int /*last*/) {
         if (!parent.isValid())
             endInsertRows();
     });
@@ -165,7 +165,7 @@ void LeftJoinModel::connectLeftModelSignals()
     });
 
     connect(m_leftModel, &QAbstractItemModel::rowsRemoved,
-            this, [this](const QModelIndex& parent, int first, int last) {
+            this, [this](const QModelIndex& parent, int /*first*/, int /*last*/) {
         if (!parent.isValid())
             endRemoveRows();
     });
@@ -178,8 +178,8 @@ void LeftJoinModel::connectLeftModelSignals()
     });
 
     connect(m_leftModel, &QAbstractItemModel::rowsMoved,
-            this, [this](const QModelIndex &sourceParent, int sourceStart,
-                int sourceEnd, const QModelIndex &destinationParent, int destinationRow) {
+            this, [this](const QModelIndex &sourceParent, int /*sourceStart*/,
+                int /*sourceEnd*/, const QModelIndex &destinationParent, int /*destinationRow*/) {
         if (!sourceParent.isValid() && !destinationParent.isValid())
             endMoveRows();
     });
@@ -224,7 +224,7 @@ void LeftJoinModel::connectLeftModelSignals()
 void LeftJoinModel::connectRightModelSignals()
 {
     connect(m_rightModel, &QAbstractItemModel::dataChanged, this,
-            [this](auto& topLeft, auto& bottomRight, auto& roles) {
+            [this](auto& /*topLeft*/, auto& /*bottomRight*/, auto& roles) {
         QVector<int> rolesTranslated;
 
         if (roles.contains(m_rightModelJoinRole)) {

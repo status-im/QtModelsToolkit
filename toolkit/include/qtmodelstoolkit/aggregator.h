@@ -31,7 +31,7 @@ protected slots:
 
 protected:
     void recalculate();
-    virtual bool acceptRoles(const QVector<int>& roles) { return true; };
+    virtual bool acceptRoles(const QVector<int>& /*roles*/) { return true; };
 
 private:
     QAbstractItemModel* m_model = nullptr;

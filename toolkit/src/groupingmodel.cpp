@@ -34,7 +34,7 @@ class RangeModel : public QAbstractListModel
 public:
     explicit RangeModel(QAbstractItemModel* sourceModel,
                         const std::vector<GroupingModel::Entry>& entries, int from, int to)
-        : m_entries(entries), m_sourceModel(sourceModel), m_from(from), m_to(to)
+        : m_sourceModel(sourceModel), m_entries(entries), m_from(from), m_to(to)
     {
     }
 
@@ -59,8 +59,9 @@ public:
         return m_sourceModel->roleNames();
     }
 
-    int rowCount(const QModelIndex& parent = {}) const override
+    int rowCount(const QModelIndex& /*parent*/ = {}) const override
     {
+        Q_ASSERT(m_to - m_from >= 0);
         return m_to - m_from + 1;
     }
 
@@ -192,7 +193,8 @@ const QString& GroupingModel::submodelRoleName() const
 
 QVariant GroupingModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid() || index.row() >= m_submodels.size())
+    if (!index.isValid()
+        || static_cast<std::size_t>(index.row()) >= m_submodels.size())
         return {};
 
     if (role == m_submodelRole)
@@ -219,7 +221,7 @@ int GroupingModel::columnCount(const QModelIndex& parent) const
     return 1;
 }
 
-int GroupingModel::rowCount(const QModelIndex &parent) const
+int GroupingModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return m_submodels.size();
 }
@@ -236,7 +238,7 @@ QModelIndex GroupingModel::index(int row, int column, const QModelIndex& parent)
     return createIndex(row, column);
 }
 
-QModelIndex GroupingModel::parent(const QModelIndex& child) const
+QModelIndex GroupingModel::parent(const QModelIndex& /*child*/) const
 {
     return {};
 }
@@ -327,7 +329,10 @@ void GroupingModel::initSubmodelRole()
 void GroupingModel::connectSignals(QAbstractItemModel* model)
 {
     connect(model, &QAbstractItemModel::rowsInserted, this,
-            [this, model](const QModelIndex &parent, int first, int last) {
+            [this, model](const QModelIndex &/*parent*/, int first, int last) {
+
+        Q_ASSERT(first >= 0);
+        Q_ASSERT(last >= 0);
 
         if (!m_rolesInitialized) {
             initRoles();
@@ -335,6 +340,7 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
         }
 
         auto insertCount = last - first + 1;
+        Q_ASSERT(insertCount > 0);
 
         std::optional<QVariant> previousGroupingValue;
 
@@ -343,7 +349,7 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
 
         std::optional<QVariant> nextGroupingValue;
 
-        if (last + 1 < m_entries.size() + insertCount)
+        if (static_cast<std::size_t>(last + 1) < m_entries.size() + insertCount)
             nextGroupingValue = ::data(model, last + 1, *m_groupingRole);
 
         int currentFirst = first;
@@ -372,7 +378,7 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
         int toRemove = 0;
 
         // shift indexes to indicate old items for rowsAboutToBe* signals
-        for (auto i = first; i < m_entries.size(); i++)
+        for (std::size_t i = first; i < m_entries.size(); i++)
             m_entries[i].sourceIndex += last - first + 1;
 
         if (toNewGroups > 0 && previousGroupingValue && nextGroupingValue
@@ -410,7 +416,6 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
         std::vector<std::pair<int, int>> pairs;
 
         int baseline = first + appendToPrevious;
-        int submodel = -1;
 
         for (int i = baseline; i < baseline + toNewGroups; i++) {
 
@@ -418,12 +423,10 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
 
             auto val = sourceModel()->data(sourceModel()->index(i, 0), *m_groupingRole);
 
-            if (val != previousVal || pairs.empty()) {
-                submodel++;
+            if (val != previousVal || pairs.empty())
                 pairs.emplace_back(i, i);
-            } else {
+            else
                 pairs.back().second++;
-            }
 
             previousVal = val;
         }
@@ -441,11 +444,11 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
         }
 
         if (appendToNext) {
-            Q_ASSERT(first < m_entries.size());
+            Q_ASSERT(static_cast<std::size_t>(first) < m_entries.size());
 
             int submodel = m_entries[first].submodel;
 
-            Q_ASSERT(submodel < m_submodels.size());
+            Q_ASSERT(static_cast<std::size_t>(submodel) < m_submodels.size());
 
             nextModel = m_submodels[submodel].get();
             nextModel->beginInsertRows({}, 0, appendToNext - 1);
@@ -459,7 +462,7 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
             const Entry& entry = m_entries[first - 1];
             int submodel = entry.submodel;
 
-            for (int i = submodel + 1; i < m_submodels.size(); i++)
+            for (std::size_t i = submodel + 1; i < m_submodels.size(); i++)
                 m_submodels[i]->shift(appendToPrevious);
         }
 
@@ -470,7 +473,7 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
                                std::make_move_iterator(newSubmodels.begin()),
                                std::make_move_iterator(newSubmodels.end()));
 
-            for (int i = offset + newSubmodels.size(); i < m_submodels.size(); i++)
+            for (std::size_t i = offset + newSubmodels.size(); i < m_submodels.size(); i++)
                 m_submodels[i]->shift(toNewGroups - toRemove);
         }
 
@@ -479,7 +482,7 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
 
             int submodel = m_entries[first].submodel + newSubmodels.size();
 
-            for (int i = submodel + 1; i < m_submodels.size(); i++)
+            for (std::size_t i = submodel + 1; i < m_submodels.size(); i++)
                 m_submodels[i]->shift(appendToNext);
         }
 
@@ -488,7 +491,7 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
 
         for (std::size_t i = 0; i < m_submodels.size(); i++) {
             RangeModel* model = m_submodels[i].get();
-            int count = model->rowCount();
+            std::size_t count = model->rowCount();
 
             for (std::size_t j = 0; j < count; j++) {
                 Entry& entry = m_entries[totalCounter];
@@ -520,12 +523,15 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
     });
 
     connect(model, &QAbstractItemModel::rowsAboutToBeRemoved, this,
-            [this, model](const QModelIndex &parent, int first, int last) {
+            [this, model](const QModelIndex &/*parent*/, int first, int last) {
+        Q_ASSERT(first >= 0);
+        Q_ASSERT(last >= 0);
+
         int firstSubmodelToBeRemoved = -1;
         int lastSubmodelToBeRemoved = -1;
 
         bool mergeRequired = first > 0
-                && last < m_entries.size() - 1
+                && static_cast<size_t>(last) < m_entries.size() - 1
                 && m_entries[first - 1].submodel != m_entries[last + 1].submodel
                 && ::data(model, first - 1, *m_groupingRole)
                     == ::data(model, last + 1, *m_groupingRole);
@@ -585,7 +591,6 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
         if (mergeRequired) {
             lastSubmodelToBeRemoved++;
 
-            auto submodel = m_entries[first - 1].submodel;
             auto submodelToBeMerged = m_entries[last + 1].submodel;
 
             mergeCount = m_submodels[submodelToBeMerged]->rowCount()
@@ -614,14 +619,14 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
     });
 
     connect(model, &QAbstractItemModel::rowsRemoved, this,
-            [this, model](const QModelIndex &parent, int first, int last) {
+            [this](const QModelIndex &/*parent*/, int first, int last) {
         int newSize = m_entries.size() - (last - first + 1);
         m_entries.clear();
         m_entries.reserve(newSize);
 
         int sourceIndex = 0;
 
-        for (int i = 0; i < m_submodels.size(); i++) {
+        for (std::size_t i = 0; i < m_submodels.size(); i++) {
             auto s = m_submodels[i].get();
             auto count = s->rowCount();
 
@@ -629,7 +634,7 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
             s->to() = sourceIndex + count - 1;
 
             for (int j = 0; j < count; j++)
-                m_entries.push_back({i, j, sourceIndex++});
+                m_entries.push_back({static_cast<int>(i), j, sourceIndex++});
         }
 
         if (m_pendingMergeSubmodel) {
@@ -642,7 +647,7 @@ void GroupingModel::connectSignals(QAbstractItemModel* model)
             m_pendingRemovalSubmodel = nullptr;
         }
 
-        Q_ASSERT(m_entries.size() == newSize);
+        Q_ASSERT(m_entries.size() == static_cast<std::size_t>(newSize));
     });
 
     connect(model, &QAbstractItemModel::dataChanged, this, [this, model] (

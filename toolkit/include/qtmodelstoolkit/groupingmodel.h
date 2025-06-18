@@ -47,7 +47,11 @@ signals:
     void submodelRoleNameChanged();
 
 protected slots:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void resetInternalData() override;
+#else
     void resetInternalData();
+#endif
 
 private:
     static constexpr auto s_defaultSubmodelRoleName = "submodel";

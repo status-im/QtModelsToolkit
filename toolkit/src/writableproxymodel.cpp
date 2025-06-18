@@ -778,7 +778,7 @@ QModelIndex WritableProxyModel::sibling(int row, int column, const QModelIndex& 
     return createIndex(row, column);
 }
 
-QModelIndex WritableProxyModel::parent(const QModelIndex& child) const
+QModelIndex WritableProxyModel::parent(const QModelIndex& /*child*/) const
 {
     //no children. List models only
     return {};
@@ -1052,7 +1052,7 @@ void WritableProxyModel::onRowsAboutToBeRemoved(const QModelIndex& parent, int s
     }
 }
 
-void WritableProxyModel::onRowsRemoved(const QModelIndex& parent, int first, int last)
+void WritableProxyModel::onRowsRemoved(const QModelIndex& parent, int /*first*/, int /*last*/)
 {
     if (parent.isValid())
         return;
@@ -1090,7 +1090,7 @@ void WritableProxyModel::onModelReset()
 }
 
 
-void WritableProxyModel::onRowsAboutToBeMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow)
+void WritableProxyModel::onRowsAboutToBeMoved(const QModelIndex &sourceParent, int /*sourceStart*/, int /*sourceEnd*/, const QModelIndex &destinationParent, int /*destinationRow*/)
 {
     if(sourceParent.isValid() || destinationParent.isValid())
         return;
@@ -1100,7 +1100,7 @@ void WritableProxyModel::onRowsAboutToBeMoved(const QModelIndex &sourceParent, i
     d->storePersitentIndexes();
 }
 
-void WritableProxyModel::onRowsMoved(const QModelIndex& sourceParent, int sourceStart, int sourceEnd, const QModelIndex& destinationParent, int destinationRow)
+void WritableProxyModel::onRowsMoved(const QModelIndex& sourceParent, int /*sourceStart*/, int /*sourceEnd*/, const QModelIndex& destinationParent, int /*destinationRow*/)
 {
     if(sourceParent.isValid() || destinationParent.isValid())
         return;
@@ -1111,7 +1111,7 @@ void WritableProxyModel::onRowsMoved(const QModelIndex& sourceParent, int source
     emit layoutChanged();
 }
 
-void WritableProxyModel::onLayoutAboutToBeChanged(const QList<QPersistentModelIndex>& sourceParents, QAbstractItemModel::LayoutChangeHint hint)
+void WritableProxyModel::onLayoutAboutToBeChanged(const QList<QPersistentModelIndex>& sourceParents, QAbstractItemModel::LayoutChangeHint /*hint*/)
 {
     if (!sourceParents.isEmpty())
         return;
@@ -1121,7 +1121,7 @@ void WritableProxyModel::onLayoutAboutToBeChanged(const QList<QPersistentModelIn
     d->storePersitentIndexes();
 }
 
-void WritableProxyModel::onLayoutChanged(const QList<QPersistentModelIndex>& sourceParents, QAbstractItemModel::LayoutChangeHint hint)
+void WritableProxyModel::onLayoutChanged(const QList<QPersistentModelIndex>& /*sourceParents*/, QAbstractItemModel::LayoutChangeHint /*hint*/)
 {
     d->createProxyToSourceRowMap();
     d->updatePersistentIndexes();

@@ -104,21 +104,27 @@ void ObjectProxyModel::setSourceModel(QAbstractItemModel* model)
     });
 
     connect(model, &QAbstractItemModel::rowsRemoved, this,
-            [this](const QModelIndex& parent, int first, int /*last*/) {
+            [this](const QModelIndex& /*parent*/, int first, int /*last*/) {
+        Q_ASSERT(first >= 0);
+
+        if (static_cast<std::size_t>(first) >= m_container.size())
+            return;
+
+        Q_ASSERT(m_container.size() > 0);
         auto updateLast = m_container.size() - 1;
 
-        if (first <= updateLast)
+        if (static_cast<std::size_t>(first) <= updateLast)
             updateIndexes(first, updateLast);
     });
 
     connect(model, &QAbstractItemModel::rowsInserted, this,
-            [this](const QModelIndex& parent, int first, int /*last*/) {
+            [this](const QModelIndex& /*parent*/, int first, int /*last*/) {
         updateIndexes(first, m_container.size() - 1);
     });
 
     connect(model, &QAbstractItemModel::dataChanged, this,
             [this, model](const QModelIndex& topLeft,
-                const QModelIndex& bottomRight, const auto& roles)
+                const QModelIndex& bottomRight, const auto& /*roles*/)
     {
         if (!topLeft.isValid() || !bottomRight.isValid())
             return;
@@ -239,7 +245,7 @@ const QStringList& ObjectProxyModel::exposedRoles() const
 
 QObject* ObjectProxyModel::proxyObject(int index) const
 {
-    if (index >= m_container.size())
+    if (index < 0 || static_cast<std::size_t>(index) >= m_container.size())
         return nullptr;
 
     auto& entry = m_container[index];

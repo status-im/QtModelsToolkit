@@ -284,7 +284,7 @@ int ConcatModel::fromSourceRow(const QAbstractItemModel* model, int row) const
     return countPrefix(it - m_sources.begin()) + row;
 }
 
-int ConcatModel::rowCount(const QModelIndex& parent) const
+int ConcatModel::rowCount(const QModelIndex& /*parent*/) const
 {
     if (!m_initialized)
         return 0;
@@ -432,7 +432,7 @@ void ConcatModel::componentComplete()
         });
 
         connect(source, &SourceModel::markerRoleValueChanged, this,
-                [this, source, i]
+                [this, i]
         {
             auto count = this->m_rowCounts[i];
 
@@ -580,14 +580,14 @@ void ConcatModel::initAllModelsSlots()
 void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
 {
     connect(model, &QAbstractItemModel::rowsAboutToBeInserted, this,
-            [this, index](const QModelIndex &parent, int first, int last)
+            [this, index](const QModelIndex &/*parent*/, int first, int last)
     {
         auto prefix = this->countPrefix(index);
         this->beginInsertRows({}, first + prefix, last + prefix);
     });
 
     connect(model, &QAbstractItemModel::rowsInserted, this,
-            [this, model, index](const QModelIndex &parent, int first, int last)
+            [this, model, index](const QModelIndex &/*parent*/, int first, int last)
     {
         m_rowCounts[index] += last - first + 1;
 
@@ -603,14 +603,14 @@ void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
     });
 
     connect(model, &QAbstractItemModel::rowsAboutToBeRemoved, this,
-            [this, index](const QModelIndex &parent, int first, int last)
+            [this, index](const QModelIndex &/*parent*/, int first, int last)
     {
         auto prefix = this->countPrefix(index);
         this->beginRemoveRows({}, first + prefix, last + prefix);
     });
 
     connect(model, &QAbstractItemModel::rowsRemoved, this,
-            [this, index](const QModelIndex &parent, int first, int last)
+            [this, index](const QModelIndex &/*parent*/, int first, int last)
     {
         m_rowCounts[index] -= last - first + 1;
         this->endRemoveRows();
@@ -812,7 +812,8 @@ QVector<int> ConcatModel::mapFromSourceRoles(
         int sourceIndex, const QVector<int>& sourceRoles) const
 {
     QVector<int> mapped;
-    if (sourceIndex < 0 || sourceIndex >= m_rolesMappingFromSource.size())
+    if (sourceIndex < 0
+        || static_cast<std::size_t>(sourceIndex) >= m_rolesMappingFromSource.size())
         return mapped;
 
     mapped.reserve(sourceRoles.size());

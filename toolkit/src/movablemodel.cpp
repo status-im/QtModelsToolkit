@@ -40,7 +40,7 @@ QAbstractItemModel* MovableModel::sourceModel() const
     return m_sourceModel;
 }
 
-int MovableModel::rowCount(const QModelIndex &parent) const
+int MovableModel::rowCount(const QModelIndex &/*parent*/) const
 {
     if (!m_synced)
         return m_indexes.size();
@@ -157,10 +157,10 @@ void MovableModel::syncOrderInternal()
         disconnect(m_sourceModel, nullptr, this, nullptr);
         connectSignalsForSyncedState();
 
-        for (int i = 0; i < m_indexes.size(); ++i) {
+        for (std::size_t i = 0; i < m_indexes.size(); ++i) {
             const QModelIndex idx = m_indexes[i];
 
-            if (i == idx.row())
+            if (!idx.isValid() || i == static_cast<size_t>(idx.row()))
                 continue;
 
             changePersistentIndex(index(i, 0), index(idx.row(), 0));
@@ -254,7 +254,7 @@ void MovableModel::resetInternalData()
     QAbstractListModel::resetInternalData();
 
     if (!m_synced)
-        syncOrder(); 
+        syncOrder();
 }
 
 void MovableModel::syncedSourceDataChanged(const QModelIndex& topLeft,
@@ -266,8 +266,8 @@ void MovableModel::syncedSourceDataChanged(const QModelIndex& topLeft,
 }
 
 void MovableModel::sourceLayoutAboutToBeChanged(
-        const QList<QPersistentModelIndex>& parents,
-        QAbstractItemModel::LayoutChangeHint hint)
+        const QList<QPersistentModelIndex>& /*parents*/,
+        QAbstractItemModel::LayoutChangeHint /*hint*/)
 {
     emit layoutAboutToBeChanged();
 
@@ -286,8 +286,8 @@ void MovableModel::sourceLayoutAboutToBeChanged(
 }
 
 void MovableModel::sourceLayoutChanged(
-        const QList<QPersistentModelIndex>& parents,
-        QAbstractItemModel::LayoutChangeHint hint)
+        const QList<QPersistentModelIndex>& /*parents*/,
+        QAbstractItemModel::LayoutChangeHint /*hint*/)
 {
     for (int i = 0; i < m_proxyIndexes.size(); ++i) {
         auto p = m_layoutChangePersistentIndexes.at(i);
@@ -341,7 +341,7 @@ void MovableModel::sourceRowsAboutToBeRemoved(const QModelIndex& parent,
     std::vector<int> indicesToRemove;
     indicesToRemove.reserve(last - first + 1);
 
-    for (auto i = 0; i < m_indexes.size(); i++) {
+    for (std::size_t i = 0; i < m_indexes.size(); i++) {
         const QPersistentModelIndex& idx = m_indexes.at(i);
 
         if (idx.row() >= first && idx.row() <= last)
@@ -355,7 +355,7 @@ void MovableModel::sourceRowsAboutToBeRemoved(const QModelIndex& parent,
     auto sequenceBegin = indicesToRemove.front();
     auto sequenceEnd = sequenceBegin;
 
-    for (auto i = 1; i < indicesToRemove.size(); i++) {
+    for (std::size_t i = 1; i < indicesToRemove.size(); i++) {
         auto idxToRemove = indicesToRemove[i];
 
         auto idxDiff = idxToRemove - sequenceEnd;

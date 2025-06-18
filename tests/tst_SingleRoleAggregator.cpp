@@ -11,7 +11,7 @@ class ChildSingleRoleAggregator : public SingleRoleAggregator {
     Q_OBJECT
 
 public:
-    explicit ChildSingleRoleAggregator(QObject *parent = nullptr) {}
+    explicit ChildSingleRoleAggregator(QObject */*parent*/ = nullptr) {}
 
 protected slots:
     QVariant calculateAggregation() override { return {}; }

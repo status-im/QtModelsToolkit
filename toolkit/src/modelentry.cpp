@@ -143,7 +143,7 @@ void ModelEntry::setSourceModel(QAbstractItemModel* sourceModel)
     connect(m_sourceModel,
             &QAbstractItemModel::rowsMoved,
             this,
-            [this](const QModelIndex& parent, int start, int end, const QModelIndex& destination, int row) {
+            [this](const QModelIndex& /*parent*/, int start, int end, const QModelIndex& destination, int /*row*/) {
                 if(!m_index.isValid()) return;
 
                 if(m_index.row() >= destination.row() && m_index.row() <= destination.row() + (end - start))
@@ -154,7 +154,7 @@ void ModelEntry::setSourceModel(QAbstractItemModel* sourceModel)
     connect(m_sourceModel,
             &QAbstractItemModel::rowsAboutToBeRemoved,
             this,
-            [this](const QModelIndex& parent, int first, int last) {
+            [this](const QModelIndex& /*parent*/, int first, int last) {
                 if(!m_index.isValid()) return;
 
                 if(m_index.row() < first || m_index.row() > last) return;

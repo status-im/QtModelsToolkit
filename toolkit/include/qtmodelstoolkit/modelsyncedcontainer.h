@@ -93,7 +93,7 @@ public:
         });
 
         QObject::connect(model, &QAbstractItemModel::destroyed,
-                         m_ctx.get(), [this, model]
+                         m_ctx.get(), [this]
         {
             m_container.clear();
         });
@@ -136,7 +136,7 @@ private:
 
         std::vector<T> newContainer(newCount);
 
-        for (std::size_t i = 0; i < m_persistentIndexes.size(); i++) {
+        for (int i = 0; i < m_persistentIndexes.size(); i++) {
             QModelIndex idx = m_persistentIndexes[i];
 
             if (!idx.isValid())

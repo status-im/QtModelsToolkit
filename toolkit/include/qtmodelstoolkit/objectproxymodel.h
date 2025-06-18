@@ -50,7 +50,11 @@ signals:
     void exposedRolesChanged();
 
 protected slots:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void resetInternalData() override;
+#else
     void resetInternalData();
+#endif
 
 private slots:
     void onCustomRoleChanged();
