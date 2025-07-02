@@ -412,6 +412,7 @@ private slots:
         model.setRightModel(&rightModel);
         model.setJoinRole("communityId");
 
+        QSignalSpy modelResetSpy(&model, &LeftJoinModel::modelReset);
         QSignalSpy rowsInsertedSpy(&model, &LeftJoinModel::rowsInserted);
         QSignalSpy rowsRemovedSpy(&model, &LeftJoinModel::rowsRemoved);
 
@@ -427,6 +428,7 @@ private slots:
         QCOMPARE(model.data(model.index(0, 0), 2), QString("Community 1"));
         QCOMPARE(model.data(model.index(1, 0), 2), QString("Community 2"));
         QCOMPARE(model.data(model.index(2, 0), 2), QString("Community 2"));
+        QCOMPARE(modelResetSpy.count(), 0);
 
         leftModel.remove(1);
 
@@ -447,6 +449,8 @@ private slots:
         QCOMPARE(rowsRemovedSpy.first().at(0), QModelIndex{});
         QCOMPARE(rowsRemovedSpy.first().at(1), 1);
         QCOMPARE(rowsRemovedSpy.first().at(2), 1);
+
+        QCOMPARE(modelResetSpy.count(), 0);
     }
 
     void layoutChangePropagationTest()
@@ -1012,6 +1016,233 @@ private slots:
         QCOMPARE(model.data(model.index(0, 0), 2), QString("Community 1"));
         QCOMPARE(model.data(model.index(1, 0), 2), QString("Community 2"));
         QCOMPARE(model.data(model.index(2, 0), 2), QString("Community 1"));
+    }
+
+    void leftModelChangedToDifferentRolesTest()
+    {
+        TestModel leftModel({
+            { "title", { "Token 1", "Token 2", "Token 3"}},
+            { "communityId", { "community_1", "community_2", "community_1" }}
+        });
+
+        TestModel rightModel({
+            { "name", { "Community 1", "Community 2" }},
+            { "communityId", { "community_1", "community_2" }},
+            { "other", { "other_1", "other_1" }}
+        });
+
+        TestModel leftModel2({
+            { "title2", { "Token 1", "Token 2", "Token 3"}},
+            { "communityId", { "community_1", "community_2", "community_1" }}
+        });
+
+        LeftJoinModel model;
+        QAbstractItemModelTester tester(&model);
+
+        model.setLeftModel(&leftModel);
+        model.setRightModel(&rightModel);
+        model.setJoinRole("communityId");
+
+        QHash<int, QByteArray> roles{{0, "title" }, {1, "communityId"},
+                                     {2, "name"}, {4, "other"}};
+
+        QCOMPARE(model.roleNames(), roles);
+        QCOMPARE(model.rowCount(), 3);
+
+        QSignalSpy modelResetSpy(&model, &LeftJoinModel::modelReset);
+
+        model.setRightModel(nullptr);
+
+        QCOMPARE(modelResetSpy.count(), 0);
+
+        model.setLeftModel(&leftModel2);
+
+        QCOMPARE(modelResetSpy.count(), 1);
+        QCOMPARE(model.rowCount(), 0);
+        QCOMPARE(model.roleNames(), {});
+
+        model.setRightModel(&rightModel);
+
+        QHash<int, QByteArray> newRoles{{0, "title2" }, {1, "communityId"},
+                                        {2, "name"}, {4, "other"}};
+
+        QCOMPARE(modelResetSpy.count(), 2);
+        QCOMPARE(model.rowCount(), 3);
+        QCOMPARE(model.roleNames(), newRoles);
+    }
+
+    void noModelResetWhenRolesNotFetchedTest()
+    {
+        TestModel leftModel({
+            { "title", { "Token 1", "Token 2", "Token 3"}},
+            { "communityId", { "community_1", "community_2", "community_1" }}
+        });
+
+        TestModel rightModel({
+            { "name", { "Community 1", "Community 2" }},
+            { "communityId", { "community_1", "community_2" }},
+            { "other", { "other_1", "other_1" }}
+        });
+
+        LeftJoinModel model;
+        QSignalSpy modelResetSpy(&model, &LeftJoinModel::modelReset);
+
+        model.setLeftModel(&leftModel);
+        model.setRightModel(&rightModel);
+        model.setJoinRole("communityId");
+
+        QCOMPARE(modelResetSpy.count(), 0);
+    }
+
+    void deferredLeftModelInitializationTest_data()
+    {
+        QTest::addColumn<bool>("fetchRoles");
+        QTest::newRow("fetch roles") << true;
+        QTest::newRow("don't fetch roles") << false;
+    }
+
+    void deferredLeftModelInitializationTest()
+    {
+        QFETCH(bool, fetchRoles);
+
+        TestModel leftModel;
+
+        TestModel rightModel({
+            { "name", { "Community 1", "Community 2" }},
+            { "communityId", { "community_1", "community_2" }},
+            { "other", { "other_1", "other_1" }}
+        });
+
+        LeftJoinModel model;
+        QSignalSpy modelResetSpy(&model, &LeftJoinModel::modelReset);
+
+        model.setLeftModel(&leftModel);
+        model.setRightModel(&rightModel);
+        model.setJoinRole("communityId");
+
+        QCOMPARE(modelResetSpy.count(), 0);
+
+        if (fetchRoles)
+            QCOMPARE(model.roleNames(), {});
+        QCOMPARE(model.rowCount(), 0);
+
+        leftModel.reset({
+            { "title", { "Token 1", "Token 2", "Token 3"}},
+            { "communityId", { "community_1", "community_2", "community_1" }}
+        });
+
+        QCOMPARE(modelResetSpy.count(), fetchRoles ? 1 : 0);
+        QCOMPARE(model.rowCount(), 3);
+
+        QHash<int, QByteArray> roles{{0, "title" }, {1, "communityId"},
+                                     {2, "name"}, {4, "other"}};
+        QCOMPARE(model.roleNames(), roles);
+
+        leftModel.insert(1, {"Token 1_1", "community_2"});
+
+        QCOMPARE(modelResetSpy.count(), fetchRoles ? 1 : 0);
+        QCOMPARE(model.rowCount(), 4);
+    }
+
+    void deferredRightModelInitializationTest_data()
+    {
+        QTest::addColumn<bool>("fetchRoles");
+        QTest::newRow("fetch roles") << true;
+        QTest::newRow("don't fetch roles") << false;
+    }
+
+    void deferredRightModelInitializationTest()
+    {
+        QFETCH(bool, fetchRoles);
+
+        TestModel leftModel({
+            { "title", { "Token 1", "Token 2", "Token 3"}},
+            { "communityId", { "community_1", "community_2", "community_1" }}
+        });
+
+        TestModel rightModel;
+
+        LeftJoinModel model;
+        QSignalSpy modelResetSpy(&model, &LeftJoinModel::modelReset);
+
+        model.setLeftModel(&leftModel);
+        model.setRightModel(&rightModel);
+        model.setJoinRole("communityId");
+
+        QCOMPARE(modelResetSpy.count(), 0);
+        if (fetchRoles)
+            QCOMPARE(model.roleNames(), {});
+        QCOMPARE(model.rowCount(), 0);
+
+        rightModel.reset({
+            { "name", { "Community 1", "Community 2" }},
+            { "communityId", { "community_1", "community_2" }},
+            { "other", { "other_1", "other_1" }}
+        });
+
+        QCOMPARE(modelResetSpy.count(), fetchRoles ? 1: 0);
+        QCOMPARE(model.rowCount(), 3);
+
+        QHash<int, QByteArray> roles{{0, "title" }, {1, "communityId"},
+                                     {2, "name"}, {4, "other"}};
+        QCOMPARE(model.roleNames(), roles);
+
+        leftModel.insert(1, {"Token 1_1", "community_2"});
+
+        QCOMPARE(modelResetSpy.count(), fetchRoles ? 1: 0);
+        QCOMPARE(model.rowCount(), 4);
+    }
+
+    void deferredLeftAndRightModelsInitializationTest_data()
+    {
+        QTest::addColumn<bool>("fetchRoles");
+        QTest::newRow("fetch roles") << true;
+        QTest::newRow("don't fetch roles") << false;
+    }
+
+    void deferredLeftAndRightModelsInitializationTest()
+    {
+        QFETCH(bool, fetchRoles);
+
+        TestModel leftModel;
+        TestModel rightModel;
+
+        LeftJoinModel model;
+        QSignalSpy modelResetSpy(&model, &LeftJoinModel::modelReset);
+
+        model.setLeftModel(&leftModel);
+        model.setRightModel(&rightModel);
+        model.setJoinRole("communityId");
+
+        QCOMPARE(modelResetSpy.count(), 0);
+
+        if (fetchRoles)
+            QCOMPARE(model.roleNames(), {});
+
+        QCOMPARE(model.rowCount(), 0);
+
+        leftModel.reset({
+            { "title", { "Token 1", "Token 2", "Token 3"}},
+            { "communityId", { "community_1", "community_2", "community_1" }}
+        });
+
+        rightModel.reset({
+            { "name", { "Community 1", "Community 2" }},
+            { "communityId", { "community_1", "community_2" }},
+            { "other", { "other_1", "other_1" }}
+        });
+
+        QCOMPARE(modelResetSpy.count(), fetchRoles ? 1 : 0);
+        QCOMPARE(model.rowCount(), 3);
+
+        QHash<int, QByteArray> roles{{0, "title" }, {1, "communityId"},
+                                     {2, "name"}, {4, "other"}};
+        QCOMPARE(model.roleNames(), roles);
+
+        leftModel.insert(1, {"Token 1_1", "community_2"});
+
+        QCOMPARE(modelResetSpy.count(), fetchRoles ? 1 : 0);
+        QCOMPARE(model.rowCount(), 4);
     }
 };
 

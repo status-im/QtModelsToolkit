@@ -127,6 +127,7 @@ void LeftJoinModel::initialize(bool reset)
     connectLeftModelSignals();
 
     m_initialized = true;
+    m_rolesFetched = false;
 
     if (reset)
         endResetModel();
@@ -284,16 +285,6 @@ QVariant LeftJoinModel::data(const QModelIndex& index, int role) const
     return m_lastUsedRightModelIndex.data(role - m_rightModelRolesOffset);
 }
 
-void LeftJoinModel::classBegin()
-{
-}
-
-void LeftJoinModel::componentComplete()
-{
-    if (!m_initialized)
-        initializeIfReady(false);
-}
-
 void LeftJoinModel::setLeftModel(QAbstractItemModel* model)
 {
     if (m_leftModel == model)
@@ -304,21 +295,27 @@ void LeftJoinModel::setLeftModel(QAbstractItemModel* model)
 
     bool was_initialized = m_initialized;
 
-    if (was_initialized)
+    if (was_initialized) {
         beginResetModel();
+        m_rolesFetched = false;
+    }
 
     m_initialized = false;
     m_leftModel = model;
+    m_roleNames = {};
+
+    connect(m_leftModel, &QAbstractItemModel::modelReset,
+            this, [this]() { initializeIfReady(m_rolesFetched); });
 
     // Some models may have roles undefined until first row is inserted,
     // like ListModel, therefore in such cases initialization must be deferred
     // until first insertion.
     connect(m_leftModel, &QAbstractItemModel::rowsInserted,
-            this, [this]() { initializeIfReady(true); });
+            this, [this]() { initializeIfReady(m_rolesFetched); });
 
     emit leftModelChanged();
 
-    initializeIfReady(!was_initialized);
+    initializeIfReady(!was_initialized && m_rolesFetched);
 
     if (was_initialized)
         endResetModel();
@@ -360,19 +357,25 @@ void LeftJoinModel::setRightModel(QAbstractItemModel* model)
 
     bool was_initialized = m_initialized;
 
-    if (was_initialized)
+    if (was_initialized) {
         beginResetModel();
+        m_rolesFetched = false;
+    }
 
     m_initialized = false;
     m_rightModel = model;
+    m_roleNames = {};
+
+    connect(m_rightModel, &QAbstractItemModel::modelReset,
+            this, [this]() { initializeIfReady(m_rolesFetched); });
 
     // see: LeftJoinModel::setLeftModel
     connect(m_rightModel, &QAbstractItemModel::rowsInserted,
-            this, [this]() { initializeIfReady(true); });
+            this, [this]() { initializeIfReady(m_rolesFetched); });
 
     emit rightModelChanged();
 
-    initializeIfReady(!was_initialized);
+    initializeIfReady(!was_initialized && m_rolesFetched);
 
     if (was_initialized)
         endResetModel();
@@ -403,7 +406,7 @@ void LeftJoinModel::setJoinRole(const QString& joinRole)
 
     emit joinRoleChanged();
 
-    initializeIfReady(true);
+    initializeIfReady(m_rolesFetched);
 }
 
 /*!
@@ -448,6 +451,7 @@ int LeftJoinModel::rowCount(const QModelIndex &parent) const
 
 QHash<int, QByteArray> LeftJoinModel::roleNames() const
 {
+    m_rolesFetched = true;
     return m_roleNames;
 }
 

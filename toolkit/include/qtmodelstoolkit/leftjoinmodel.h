@@ -2,14 +2,12 @@
 
 #include <QAbstractListModel>
 #include <QPointer>
-#include <QQmlParserStatus>
 
 namespace qtmt {
 
-class LeftJoinModel : public QAbstractListModel, public QQmlParserStatus
+class LeftJoinModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_INTERFACES(QQmlParserStatus)
 
     Q_PROPERTY(QAbstractItemModel* leftModel READ leftModel
                WRITE setLeftModel NOTIFY leftModelChanged)
@@ -42,9 +40,6 @@ public:
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex& index, int role) const override;
 
-    void classBegin() override;
-    void componentComplete() override;
-
 signals:
     void leftModelChanged();
     void rightModelChanged();
@@ -62,6 +57,7 @@ private:
     QHash<int, QByteArray> m_leftRoleNames;
     QHash<int, QByteArray> m_rightRoleNames;
     QHash<int, QByteArray> m_roleNames;
+    mutable bool m_rolesFetched = false;
     QVector<int> m_joinedRoles;
 
     QString m_joinRole;
