@@ -203,8 +203,11 @@ void WritableProxyModelPrivate::createProxyToSourceRowMap()
     auto sourceModel = q.sourceModel();
 
     proxyToSourceRowMapping.clear();
+
+    auto rowCount = q.rowCount();
     int sourceIter = 0;
-    for (int i = 0; i < q.rowCount(); ++i) {
+
+    for (int i = 0; i < rowCount; ++i) {
         if (insertedRows.contains(q.index(i, 0)))
         {
             proxyToSourceRowMapping.append(-1);
@@ -732,7 +735,7 @@ void WritableProxyModel::setSourceModel(QAbstractItemModel* sourceModel)
     connect(sourceModel, &QAbstractItemModel::rowsAboutToBeMoved, this, &WritableProxyModel::onRowsAboutToBeMoved);
     connect(sourceModel, &QAbstractItemModel::rowsMoved, this, &WritableProxyModel::onRowsMoved);
     connect(sourceModel, &QAbstractItemModel::layoutAboutToBeChanged, this, &WritableProxyModel::onLayoutAboutToBeChanged);
-    connect(sourceModel, &QAbstractItemModel::layoutChanged, this, &WritableProxyModel::onModelReset);
+    connect(sourceModel, &QAbstractItemModel::layoutChanged, this, &WritableProxyModel::onLayoutChanged);
 
     endResetModel();
 }
