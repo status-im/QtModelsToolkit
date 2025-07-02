@@ -7,6 +7,7 @@ namespace qtmt {
 class TestModel : public QAbstractListModel {
 
 public:
+    TestModel() = default;
     explicit TestModel(QList<QPair<QString, QVariantList>> data);
     explicit TestModel(QList<QString> roles);
 
@@ -30,6 +31,9 @@ public:
 
     // emits modelAboutToBeReset/modelReset, content remains the same
     void reset();
+
+    // emits modelAboutToBeReset/modelReset, sets new roles and data
+    void reset(QList<QPair<QString, QVariantList>> data);
 
     // emits modelAboutToBeReset/modelReset, content is removed
     void resetAndClear();

@@ -136,6 +136,14 @@ void TestModel::reset()
     endResetModel();
 }
 
+void TestModel::reset(QList<QPair<QString, QVariantList>> data)
+{
+    beginResetModel();
+    m_data = std::move(data);
+    initRoles();
+    endResetModel();
+}
+
 void TestModel::resetAndClear()
 {
     beginResetModel();
@@ -147,6 +155,7 @@ void TestModel::resetAndClear()
 
 void TestModel::initRoles()
 {
+    m_roles.clear();
     m_roles.reserve(m_data.size());
 
     for (auto i = 0; i < m_data.size(); i++)
