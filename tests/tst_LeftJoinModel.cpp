@@ -1091,6 +1091,12 @@ private slots:
         model.setRightModel(&rightModel);
         model.setJoinRole("communityId");
 
+        QHash<int, QByteArray> roles{{0, "title" }, {1, "communityId"},
+                                     {2, "name"}, {4, "other"}};
+
+        QCOMPARE(model.roleNames(), roles);
+        QCOMPARE(model.rowCount(), 3);
+
         QCOMPARE(modelResetSpy.count(), 0);
     }
 
@@ -1243,6 +1249,78 @@ private slots:
 
         QCOMPARE(modelResetSpy.count(), fetchRoles ? 1 : 0);
         QCOMPARE(model.rowCount(), 4);
+    }
+
+    void leftModelResetWithDifferentRolesTest() {
+        TestModel leftModel({
+            { "title", { "Token 1", "Token 2", "Token 3"}},
+            { "communityId", { "community_1", "community_2", "community_1" }}
+        });
+
+        TestModel rightModel({
+            { "name", { "Community 1", "Community 2" }},
+            { "communityId", { "community_1", "community_2" }},
+            { "other", { "other_1", "other_1" }}
+        });
+
+        LeftJoinModel model;
+        QSignalSpy modelResetSpy(&model, &LeftJoinModel::modelReset);
+
+        model.setLeftModel(&leftModel);
+        model.setRightModel(&rightModel);
+        model.setJoinRole("communityId");
+
+        QCOMPARE(modelResetSpy.count(), 0);
+
+        leftModel.reset({
+            { "other_1", { "o1_1", "o1_2" }},
+            { "other_2", { "o2_1", "o2_2" }},
+            { "communityId", { "community_1", "community_2" }}
+        });
+
+        QCOMPARE(modelResetSpy.count(), 1);
+
+        QHash<int, QByteArray> roles{{0, "other_1" }, {1, "other_2"},
+                                     {2, "communityId"}, {3, "name"}, {5, "other"}};
+
+        QCOMPARE(model.roleNames(), roles);
+        QCOMPARE(model.rowCount(), 2);
+    }
+
+    void rightModelResetWithDifferentRolesTest() {
+        TestModel leftModel({
+            { "title", { "Token 1", "Token 2", "Token 3"}},
+            { "communityId", { "community_1", "community_2", "community_1" }}
+        });
+
+        TestModel rightModel({
+            { "name", { "Community 1", "Community 2" }},
+            { "communityId", { "community_1", "community_2" }},
+            { "other", { "other_1", "other_1" }}
+        });
+
+        LeftJoinModel model;
+        QSignalSpy modelResetSpy(&model, &LeftJoinModel::modelReset);
+
+        model.setLeftModel(&leftModel);
+        model.setRightModel(&rightModel);
+        model.setJoinRole("communityId");
+
+        QCOMPARE(modelResetSpy.count(), 0);
+
+        rightModel.reset({
+            { "other_1", { "o1_1", "o1_2" }},
+            { "other_2", { "o2_1", "o2_2" }},
+            { "communityId", { "community_1", "community_2" }}
+        });
+
+        QCOMPARE(modelResetSpy.count(), 1);
+
+        QHash<int, QByteArray> roles{{0, "title" }, {1, "communityId"},
+                                     {2, "other_1"}, {3, "other_2"}};
+
+        QCOMPARE(model.roleNames(), roles);
+        QCOMPARE(model.rowCount(), 3);
     }
 };
 

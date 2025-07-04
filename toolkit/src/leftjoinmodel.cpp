@@ -218,8 +218,13 @@ void LeftJoinModel::connectLeftModelSignals()
     connect(m_leftModel, &QAbstractItemModel::modelAboutToBeReset, this,
             &LeftJoinModel::beginResetModel);
 
-    connect(m_leftModel, &QAbstractItemModel::modelReset, this,
-            &LeftJoinModel::endResetModel);
+    connect(m_leftModel, &QAbstractItemModel::modelReset, this, [this] () {
+        m_initialized = false;
+        m_roleNames = {};
+        initializeIfReady(false);
+
+        this->endResetModel();
+    });
 }
 
 void LeftJoinModel::connectRightModelSignals()
@@ -248,8 +253,16 @@ void LeftJoinModel::connectRightModelSignals()
             emitJoinedRolesChanged);
     connect(m_rightModel, &QAbstractItemModel::rowsInserted, this,
             emitJoinedRolesChanged);
-    connect(m_rightModel, &QAbstractItemModel::modelReset, this,
-            emitJoinedRolesChanged);
+    connect(m_rightModel, &QAbstractItemModel::modelAboutToBeReset, this,
+            &LeftJoinModel::beginResetModel);
+
+    connect(m_rightModel, &QAbstractItemModel::modelReset, this, [this] () {
+        m_initialized = false;
+        m_roleNames = {};
+        initializeIfReady(false);
+
+        this->endResetModel();
+    });
 }
 
 QVariant LeftJoinModel::data(const QModelIndex& index, int role) const
