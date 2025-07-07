@@ -1,4 +1,5 @@
-#include <QtTest>
+#include <QTest>
+#include <QSignalSpy>
 
 #include <qtmodelstoolkit/singleroleaggregator.h>
 #include <qtmodelstoolkit/testing/testmodel.h>

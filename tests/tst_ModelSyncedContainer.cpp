@@ -1,5 +1,9 @@
-#include <QtTest>
+#include <QTest>
 #include <QQmlEngine>
+
+#include <QIdentityProxyModel>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include <qtmodelstoolkit/modelsyncedcontainer.h>
 
