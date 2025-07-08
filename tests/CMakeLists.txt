@@ -77,3 +77,7 @@ add_test(NAME GroupingModelTest COMMAND GroupingModelTest)
 add_executable(ModelCountTest tst_ModelCount.cpp)
 target_link_libraries(ModelCountTest ${PROJECT_NAME} ${PROJECT_NAME}TestLib)
 add_test(NAME ModelCountTest COMMAND ModelCountTest)
+
+add_executable(SortFilterProxyModelTest tst_SortFilterProxyModel.cpp)
+target_link_libraries(SortFilterProxyModelTest ${PROJECT_NAME} ${PROJECT_NAME}TestLib SortFilterProxyModel)
+add_test(NAME SortFilterProxyModelTest COMMAND SortFilterProxyModelTest)
