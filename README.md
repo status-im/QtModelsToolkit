@@ -9,9 +9,15 @@ create custom models in C++.
 
 The library was originally created as part of the
 [Status Desktop](https://github.com/status-im/status-desktop) project, then
-split off into a separate repository.
+split off into a separate repository. The earlier git history of the toolkit
+can be found in Status Desktop repository at that [point](https://github.com/status-im/status-desktop/tree/06ec58e2e47b88bf213f2fc6f6950b9ecfb216c9).
 
 Online documentation can be found here: https://status-im.github.io/QtModelsToolkit/
+
+> [!IMPORTANT]  
+> This library works great with the [SFPM](https://github.com/oKcerG/SortFilterProxyModel)
+> library, but it's best to use a [patched version](https://github.com/status-im/SortFilterProxyModel)
+> that includes many fixes that ensure both libraries work together seamlessly.
 
 ## Features
 
@@ -31,7 +37,7 @@ Online documentation can be found here: https://status-im.github.io/QtModelsTool
   
 - **GroupingModel**
   A proxy model that groups items from a source model based on value of role
-  specified as grouping role.
+  specified as the grouping role.
   
 - **ObjectProxyModel**
   Swiss Army knife of proxy models. It allows to create new roles and modify
@@ -134,7 +140,9 @@ add_subdirectory(vendor/QtModelsToolkit)
 target_link_libraries(<YourTarget> QtModelsToolkit)
 ```
 
-Sample project is available here: https://github.com/status-im/QtModelsToolkit-Example
+A sample project is available here: https://github.com/status-im/QtModelsToolkit-Example.
+Also [Status Desktop](https://github.com/status-im/status-desktop) is a great
+source of examples, where the toolkit is used in a real app.
 
 ## License
 
