@@ -10,7 +10,7 @@ include(FetchContent)
 FetchContent_Declare(
   SortFilterProxyModel
   GIT_REPOSITORY https://github.com/status-im/SortFilterProxyModel.git
-  GIT_TAG master
+  GIT_TAG 6477b1e465b02f18007900125864cdfa812ba8ad
 )
 
 FetchContent_MakeAvailable(SortFilterProxyModel)
