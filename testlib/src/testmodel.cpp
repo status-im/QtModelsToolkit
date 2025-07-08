@@ -27,8 +27,7 @@ int TestModel::rowCount(const QModelIndex& parent) const
     if(parent.isValid())
         return 0;
 
-    Q_ASSERT(m_data.size());
-    return m_data.first().second.size();
+    return m_data.isEmpty() ? 0 : m_data.first().second.size();
 }
 
 QHash<int, QByteArray> TestModel::roleNames() const
@@ -61,6 +60,24 @@ void TestModel::insert(int index, QVariantList row)
         roleVariantList.insert(index, std::move(row[i]));
     }
 
+    endInsertRows();
+}
+
+void TestModel::append(QVariantList row)
+{
+    insert(rowCount(), std::move(row));
+}
+
+void TestModel::appendAndInitRoles(QList<QPair<QString, QVariantList>> data)
+{
+    Q_ASSERT(m_roles.empty());
+    Q_ASSERT(m_data.empty());
+    Q_ASSERT(!data.empty());
+    Q_ASSERT(!data.at(0).second.empty());
+
+    beginInsertRows(QModelIndex{}, 0, data.at(0).second.size());
+    m_data = std::move(data);
+    initRoles();
     endInsertRows();
 }
 

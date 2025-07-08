@@ -16,6 +16,15 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
 
     void insert(int index, QVariantList row);
+    void append(QVariantList row);
+
+    // intened to be used only when the model has no role names specified,
+    // to mimic behavior of first insertion/append to an empty ListModel,
+    // described in https://bugreports.qt.io/browse/QTBUG-57971. The model emits
+    // rowsAboutToBeInserted/rowsInserted with changed roleNames, without
+    // issuing model reset.
+    void appendAndInitRoles(QList<QPair<QString, QVariantList>> data);
+
     void update(int index, int role, QVariant value);
     void remove(int index);
 
@@ -35,7 +44,8 @@ public:
     // emits modelAboutToBeReset/modelReset, sets new roles and data
     void reset(QList<QPair<QString, QVariantList>> data);
 
-    // emits modelAboutToBeReset/modelReset, content is removed
+    // emits modelAboutToBeReset/modelReset, content is removed, roles remain the
+    // same
     void resetAndClear();
 
 private:
