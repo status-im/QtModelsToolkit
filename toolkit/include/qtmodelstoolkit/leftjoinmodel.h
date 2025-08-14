@@ -2,6 +2,7 @@
 
 #include <QAbstractListModel>
 #include <QPointer>
+#include <QCache>
 
 namespace qtmt {
 
@@ -21,6 +22,8 @@ class LeftJoinModel : public QAbstractListModel
     Q_PROPERTY(QStringList rolesToJoin READ rolesToJoin
                WRITE setRolesToJoin NOTIFY rolesToJoinChanged)
 
+    Q_PROPERTY(qsizetype cacheSize READ cacheSize WRITE setCacheSize NOTIFY cacheSizeChanged)
+
 public:
     explicit LeftJoinModel(QObject* parent = nullptr);
 
@@ -36,6 +39,9 @@ public:
     void setRolesToJoin(const QStringList& roles);
     const QStringList& rolesToJoin() const;
 
+    qsizetype cacheSize() const;
+    void setCacheSize(qsizetype size);
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex& index, int role) const override;
@@ -45,6 +51,7 @@ signals:
     void rightModelChanged();
     void joinRoleChanged();
     void rolesToJoinChanged();
+    void cacheSizeChanged();
 
 private:
     void initializeIfReady(bool reset);
@@ -52,6 +59,7 @@ private:
 
     void connectLeftModelSignals();
     void connectRightModelSignals();
+    void clearCache();
 
     int m_rightModelRolesOffset = 0;
     QHash<int, QByteArray> m_leftRoleNames;
@@ -70,7 +78,9 @@ private:
 
     bool m_initialized = false;
 
-    mutable QPersistentModelIndex m_lastUsedRightModelIndex;
+    // LRU cache for right model
+    qsizetype m_cacheSize = 1000;
+    mutable QCache<QVariant, QPersistentModelIndex> m_rightModelCache;
 
     // helpers for handling layoutChanged from source
     QList<QPersistentModelIndex> m_layoutChangePersistentIndexes;

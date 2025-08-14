@@ -1322,6 +1322,118 @@ private slots:
         QCOMPARE(model.roleNames(), roles);
         QCOMPARE(model.rowCount(), 3);
     }
+
+    void cacheTest()
+    {
+        TestModel leftModel({
+           { "id", { "1", "2", "3", "4" }},
+           { "communityId", { "c1", "c2", "c3", "c4" }}
+        });
+
+        TestModel rightModel({
+           { "name", { "Community 1", "Community 2", "Community 3", "Community 4" }},
+           { "communityId", { "c1", "c2", "c3", "c4" }}
+        });
+
+        LeftJoinModel model;
+        model.setCacheSize(2);
+        QCOMPARE(model.cacheSize(), 2);
+
+        model.setLeftModel(&leftModel);
+        model.setRightModel(&rightModel);
+        model.setJoinRole("communityId");
+
+        // Access item 0 -> cache: [c1]
+        QCOMPARE(model.data(model.index(0, 0), 2), QString("Community 1"));
+
+        // Access item 1 -> cache: [c2, c1]
+        QCOMPARE(model.data(model.index(1, 0), 2), QString("Community 2"));
+
+        // Access item 0 again -> cache: [c1, c2]
+        QCOMPARE(model.data(model.index(0, 0), 2), QString("Community 1"));
+
+        // Access item 2 -> cache: [c3, c1], item c2 is evicted
+        QCOMPARE(model.data(model.index(2, 0), 2), QString("Community 3"));
+
+        // Access item 3 -> cache: [c4, c3], item c1 is evicted
+        QCOMPARE(model.data(model.index(3, 0), 2), QString("Community 4"));
+
+        // Now, if we access item 1, it should be a cache miss and it will be fetched.
+        // This will evict item c3. cache: [c2, c4]
+        QCOMPARE(model.data(model.index(1, 0), 2), QString("Community 2"));
+
+        // Check that cache is cleared when right model is reset
+        rightModel.reset({
+           { "name", { "C1", "C2", "C3", "C4" }},
+           { "communityId", { "c1", "c2", "c3", "c4" }}
+        });
+
+        // Accessing item 1 again should give the new value
+        QCOMPARE(model.data(model.index(1, 0), 2), QString("C2"));
+    }
+
+    void benchmarkDataAccess_data()
+    {
+        QTest::addColumn<bool>("useCache");
+        QTest::newRow("with cache") << true;
+        QTest::newRow("without cache") << false;
+    }
+
+    void benchmarkDataAccess()
+    {
+        QFETCH(bool, useCache);
+
+        const int rowCount = 10000;
+        QVariantList leftIds, leftCommunityIds;
+        for(int i = 0; i < rowCount; ++i) {
+            leftIds << QString("Token %1").arg(i);
+            leftCommunityIds << QString("community_%1").arg(i);
+        }
+
+        TestModel leftModel({
+           { "title", leftIds },
+           { "communityId", leftCommunityIds }
+        });
+
+        QVariantList rightNames, rightCommunityIds;
+        for(int i = 0; i < rowCount; ++i) {
+            rightNames << QString("Community %1").arg(i);
+            rightCommunityIds << QString("community_%1").arg(i);
+        }
+
+        TestModel rightModel({
+           { "name", rightNames },
+           { "communityId", rightCommunityIds }
+        });
+
+        LeftJoinModel model;
+        if (useCache) {
+            model.setCacheSize(10000);
+        } else {
+            // A size of 1 is the minimal QCache size that does something,
+            // but it's effectively "no real cache" for random access.
+            // It behaves similarly to the original m_lastUsedRightModelIndex.
+            model.setCacheSize(1);
+        }
+
+        model.setLeftModel(&leftModel);
+        model.setRightModel(&rightModel);
+        model.setJoinRole("communityId");
+
+        QCOMPARE(model.rowCount(), rowCount);
+
+        // Role for 'name' from the right model
+        const int nameRole = model.roleNames().key("name");
+
+        QBENCHMARK {
+            for (int i = 0; i < 5; ++i) {
+                for (int j = 0; j < 1000; ++j) { // Access each item 1000 times
+                    int rowIndex = rowCount - j;
+                    model.data(model.index(rowIndex, 0), nameRole);
+                }
+            }
+        }
+    }
 };
 
 QTEST_MAIN(TestLeftJoinModel)
