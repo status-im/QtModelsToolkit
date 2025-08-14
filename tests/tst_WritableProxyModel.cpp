@@ -111,7 +111,7 @@ public:
         endInsertRows();
     }
 
-    void insertRows(int index, const QList<QPair<QString, QVariantList>>& data)
+    void insertTestRows(int index, const QList<QPair<QString, QVariantList>>& data)
     {
         if (data.isEmpty() || data.at(0).second.isEmpty())
             return;
@@ -521,7 +521,7 @@ private slots:
         QCOMPARE(dataChangedSpy.first().at(1), model.index(0, 0));
 
         model.setData(model.index(0, 0), "Token 1.2", 0);
-        
+
         QCOMPARE(model.rowCount(), 2);
         QCOMPARE(model.dirty(), true);
         QCOMPARE(model.data(model.index(0, 0), 0), "Token 1.2");
@@ -537,7 +537,7 @@ private slots:
         QCOMPARE(dataChangedSpy.count(), 2);
 
         sourceModel.setData(sourceModel.index(0, 0), "community_1.1", 1);
-        
+
         //other roles can change
         QCOMPARE(model.dirty(), true);
         QCOMPARE(model.data(model.index(0, 0), 1), "community_1.1");
@@ -757,7 +757,7 @@ private slots:
         QCOMPARE(model.syncedRemovals(), true);
 
         model.setData(model.index(0, 0), "Token 1.1", 0);
-        
+
         QCOMPARE(model.dirty(), true);
         QCOMPARE(model.rowCount(), 3);
 
@@ -830,7 +830,7 @@ private slots:
 
         QCOMPARE(model.dirty(), true);
         QCOMPARE(model.rowCount(), 2);
-        
+
         QCOMPARE(rowsRemovedSpy.count(), 0);
         QCOMPARE(modelResetSpy.count(), 1);
         QCOMPARE(dataChangedSpy.count(), 1);
@@ -1141,7 +1141,7 @@ private slots:
         QCOMPARE(model.data(model.index(6, 0), 0), "Token inserted 2");
 
         // source model matches proxy model
-        sourceModel.insertRows(5, {
+        sourceModel.insertTestRows(5, {
            { "title", { "Token inserted 1", "Token inserted 2"}},
            { "communityId", { "community_inserted_1", "community_inserted_2"}}
         });
@@ -1151,11 +1151,11 @@ private slots:
         QCOMPARE(sourceModel.data(sourceModel.index(5, 0), 1), "community_inserted_1");
         QCOMPARE(sourceModel.data(sourceModel.index(6, 0), 0), "Token inserted 2");
         QCOMPARE(sourceModel.data(sourceModel.index(6, 0), 1), "community_inserted_2");
-         
+
         QCOMPARE(model.dirty(), false);
         QCOMPARE(model.rowCount(), 7);
 
-        sourceModel.insertRows(2, {
+        sourceModel.insertTestRows(2, {
            { "title", { "Token 0.1", "Token 0.2"}},
            { "communityId", { "community_0.1", "community_0.2"}}
         });

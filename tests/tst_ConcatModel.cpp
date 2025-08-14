@@ -1804,12 +1804,12 @@ private slots:
                 });
 
                 connect(&model, &ConcatModel::rowsRemoved, &context,
-                        [this, &model, &roles] {
+                        [&model] {
                     QCOMPARE(model.rowCount(), 0);
                 });
 
                 connect(&model, &ConcatModel::rowsAboutToBeInserted, &context,
-                        [this, &model, &roles] {
+                        [&model] {
                     QCOMPARE(model.rowCount(), 0);
                 });
 

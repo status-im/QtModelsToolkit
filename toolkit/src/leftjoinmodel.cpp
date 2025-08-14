@@ -1,8 +1,47 @@
 #include "qtmodelstoolkit/leftjoinmodel.h"
 
 #include <QDebug>
+#include <QVariant>
 
 #include <algorithm>
+
+#include <QHash>
+#include <QMetaType>
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+using qhash_result_t = uint;
+inline QMetaType::Type typeId(const QVariant &v) {
+    return static_cast<QMetaType::Type>(v.type());
+}
+#else
+using qhash_result_t = size_t;
+inline QMetaType::Type typeId(const QVariant &v) {
+    return static_cast<QMetaType::Type>(v.typeId());
+}
+#endif
+
+// for QCache to work with QVariant as a key.
+inline qhash_result_t qHash(const QVariant &v, qhash_result_t seed = 0)
+{
+    if (!v.isValid())
+        return seed;
+
+    switch (typeId(v)) {
+        case QMetaType::Int:
+            return ::qHash(v.toInt(), seed);
+        case QMetaType::UInt:
+            return ::qHash(v.toUInt(), seed);
+        case QMetaType::LongLong:
+            return ::qHash(v.toLongLong(), seed);
+        case QMetaType::ULongLong:
+            return ::qHash(v.toULongLong(), seed);
+        case QMetaType::QString:
+            return ::qHash(v.toString(), seed);
+        default:
+            // Fallback for other types, assuming they can be converted to a string representation.
+            return ::qHash(v.toString(), seed);
+    }
+}
 
 namespace qtmt {
 
@@ -20,6 +59,7 @@ namespace qtmt {
 LeftJoinModel::LeftJoinModel(QObject* parent)
     : QAbstractListModel{parent}
 {
+    m_rightModelCache.setMaxCost(m_cacheSize);
 }
 
 void LeftJoinModel::initializeIfReady(bool reset)
@@ -242,10 +282,12 @@ void LeftJoinModel::connectRightModelSignals()
                 role += m_rightModelRolesOffset;
         }
 
+        clearCache();
         emit dataChanged(index(0), index(rowCount() - 1), rolesTranslated);
     });
 
     auto emitJoinedRolesChanged = [this] {
+        clearCache();
         emit dataChanged(index(0), index(rowCount() - 1), m_joinedRoles);
     };
 
@@ -259,6 +301,7 @@ void LeftJoinModel::connectRightModelSignals()
     connect(m_rightModel, &QAbstractItemModel::modelReset, this, [this] () {
         m_initialized = false;
         m_roleNames = {};
+        clearCache();
         initializeIfReady(false);
 
         this->endResetModel();
@@ -280,11 +323,10 @@ QVariant LeftJoinModel::data(const QModelIndex& index, int role) const
 
     auto joinRoleLeftValue = m_leftModel->data(idx, m_leftModelJoinRole);
 
-    if (m_lastUsedRightModelIndex.isValid()
-            && m_rightModel->data(m_lastUsedRightModelIndex,
-                                  m_rightModelJoinRole) == joinRoleLeftValue) {
-        return m_rightModel->data(m_lastUsedRightModelIndex,
-                                  role - m_rightModelRolesOffset);
+    if (auto cachedIndex = m_rightModelCache.object(joinRoleLeftValue)) {
+        if (cachedIndex->isValid()) {
+            return m_rightModel->data(*cachedIndex, role - m_rightModelRolesOffset);
+        }
     }
 
     QModelIndexList match = m_rightModel->match(
@@ -294,8 +336,10 @@ QVariant LeftJoinModel::data(const QModelIndex& index, int role) const
     if (match.isEmpty())
         return {};
 
-    m_lastUsedRightModelIndex = match.constFirst();
-    return m_lastUsedRightModelIndex.data(role - m_rightModelRolesOffset);
+    QPersistentModelIndex persistentMatch = match.constFirst();
+    m_rightModelCache.insert(joinRoleLeftValue, new QPersistentModelIndex(persistentMatch));
+
+    return persistentMatch.data(role - m_rightModelRolesOffset);
 }
 
 void LeftJoinModel::setLeftModel(QAbstractItemModel* model)
@@ -311,6 +355,7 @@ void LeftJoinModel::setLeftModel(QAbstractItemModel* model)
     if (was_initialized) {
         beginResetModel();
         m_rolesFetched = false;
+        clearCache();
     }
 
     m_initialized = false;
@@ -359,6 +404,7 @@ void LeftJoinModel::setRightModel(QAbstractItemModel* model)
 
         m_rightModel = model;
         emit rightModelChanged();
+        clearCache();
 
         auto count = rowCount();
 
@@ -373,6 +419,7 @@ void LeftJoinModel::setRightModel(QAbstractItemModel* model)
     if (was_initialized) {
         beginResetModel();
         m_rolesFetched = false;
+        clearCache();
     }
 
     m_initialized = false;
@@ -453,6 +500,21 @@ const QStringList &LeftJoinModel::rolesToJoin() const
     return m_rolesToJoin;
 }
 
+qsizetype LeftJoinModel::cacheSize() const
+{
+    return m_cacheSize;
+}
+
+void LeftJoinModel::setCacheSize(qsizetype size)
+{
+    if (m_cacheSize == size)
+        return;
+
+    m_cacheSize = size;
+    m_rightModelCache.setMaxCost(m_cacheSize);
+    emit cacheSizeChanged();
+}
+
 int LeftJoinModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
@@ -466,6 +528,11 @@ QHash<int, QByteArray> LeftJoinModel::roleNames() const
 {
     m_rolesFetched = true;
     return m_roleNames;
+}
+
+void LeftJoinModel::clearCache()
+{
+    m_rightModelCache.clear();
 }
 
 } // namespace qtmt
