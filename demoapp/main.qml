@@ -6,7 +6,7 @@ ApplicationWindow {
     height: 768
 
     visible: true
-    title: qsTr("Hello World")
+    title: "Hello World"
 
     ListView {
         id: listView
