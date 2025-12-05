@@ -74,7 +74,8 @@ QVariant ObjectProxyModel::data(const QModelIndex& index, int role) const
 
     if (m_delegate && m_exposedRolesSet.contains(role)) {
         const auto proxy = this->proxyObject(index.row());
-        return proxy->property(m_roleNames[role]);
+        if (proxy != nullptr)
+            return proxy->property(m_roleNames[role]);
     }
 
     return QIdentityProxyModel::data(index, role);
@@ -253,9 +254,15 @@ QObject* ObjectProxyModel::proxyObject(int index) const
     if (entry.proxy)
         return entry.proxy.get();
 
+    if (m_delegate == nullptr)
+        return nullptr;
+
     auto creationContext = m_delegate->creationContext();
+    if (creationContext != nullptr && !creationContext->isValid())
+        return nullptr;
+
     auto parentContext = creationContext
-            ? creationContext : m_delegate->engine()->rootContext();
+                             ? creationContext : m_delegate->engine()->rootContext();
 
     auto context = new QQmlContext(parentContext);
     auto rowData = new QQmlPropertyMap(context);
