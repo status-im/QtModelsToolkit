@@ -18,7 +18,12 @@ namespace qtmt {
 */
 ModelEntry::ModelEntry(QObject* parent)
     : QObject(parent)
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 11, 0)
+    , m_item(QQmlPropertyMap::create(this))
+#else
     , m_item(new QQmlPropertyMap(this))
+#endif
 { }
 
 /*!
@@ -334,7 +339,11 @@ void ModelEntry::resetItem()
         setAvailable(false);
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 11, 0)
+    m_item.reset(QQmlPropertyMap::create());
+#else
     m_item.reset(new QQmlPropertyMap());
+#endif
 
     fillItem();
 

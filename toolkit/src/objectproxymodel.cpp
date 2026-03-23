@@ -265,7 +265,11 @@ QObject* ObjectProxyModel::proxyObject(int index) const
                              ? creationContext : m_delegate->engine()->rootContext();
 
     auto context = new QQmlContext(parentContext);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 11, 0)
+    auto rowData = QQmlPropertyMap::create(context);
+#else
     auto rowData = new QQmlPropertyMap(context);
+#endif
     auto model = sourceModel();
 
     QHashIterator i(m_expectedRoleNames);
