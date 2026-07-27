@@ -2,6 +2,7 @@
 
 #include <QAbstractItemModel>
 #include <QDebug>
+#include <QQmlEngine>
 
 namespace qtmt {
 
@@ -88,8 +89,26 @@ QVariantMap ModelQuery::get(QAbstractItemModel *model, int row) const
 QVariant ModelQuery::get(QAbstractItemModel *model,
                                  int row, const QString &roleName) const
 {
-    if (auto role = roleByName(model, roleName); role != -1)
-        return model->data(model->index(row, 0), role);
+    if (auto role = roleByName(model, roleName); role != -1) {
+        QVariant value = model->data(model->index(row, 0), role);
+        // A QObject* returned to JS from a Q_INVOKABLE (even wrapped in a
+        // QVariant) is made destructible by the JS GC unless ownership is
+        // explicitly pinned. Role values (e.g. nested list models) stay owned
+        // by the source model — pin them so the GC cannot delete them.
+        // Objects already under JS ownership are left alone: pinning those
+        // would leak them, but the GC may then delete them while the model
+        // still refers to them, so surface it.
+        if (QObject *obj = value.value<QObject *>()) {
+            if (QQmlEngine::objectOwnership(obj) == QQmlEngine::JavaScriptOwnership) {
+                qWarning() << "ModelQuery::get: role" << roleName
+                           << "returned JS-owned object" << obj
+                           << "- not pinning; the JS GC may delete it while the model still uses it";
+            } else {
+                QQmlEngine::setObjectOwnership(obj, QQmlEngine::CppOwnership);
+            }
+        }
+        return value;
+    }
 
     return {};
 }
