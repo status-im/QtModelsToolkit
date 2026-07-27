@@ -6,6 +6,7 @@ jobs:
   build-and-test:
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         qt-version: [5.15.2, 6.8.3]
     steps:
@@ -16,6 +17,20 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: '${{ matrix.qt-version }}'
+
+    - name: Patch Qt 5.15 headers for MSVC 17.12+ (stdext iterators removed)
+      # stdext::(un)checked_array_iterator was removed from the MSVC STL in
+      # VS 17.12; Qt 5.15.2 headers still use it (QTBUG-118993, fixed only in
+      # Qt >= 5.15.17 which aqtinstall does not offer). Fall back to the
+      # portable raw-pointer path Qt uses on every other compiler.
+      if: startsWith(matrix.qt-version, '5.15')
+      shell: powershell
+      run: |
+        $f = "$env:QT_ROOT_DIR\include\QtCore\qcompilerdetection.h"
+        (Get-Content $f) `
+          -replace [regex]::Escape('stdext::make_unchecked_array_iterator(x)'), '(x)' `
+          -replace [regex]::Escape('stdext::make_checked_array_iterator(x, size_t(N))'), '(x)' |
+          Set-Content $f
 
     - name: Set up build tools
       # On windows-latest, Visual Studio and CMake are pre-installed, so usually nothing is needed.
