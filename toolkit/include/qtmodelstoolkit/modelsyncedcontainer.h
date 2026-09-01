@@ -62,7 +62,7 @@ public:
         });
 
         QObject::connect(model, &QAbstractItemModel::rowsMoved,
-                         m_ctx.get(), [this] (const QModelIndex& parent)
+                         m_ctx.get(), [this, model] (const QModelIndex& parent)
         {
             if (parent.isValid())
                 return;
@@ -70,7 +70,7 @@ public:
             // This implementation is simplified. Can be replaced by faster
             // implementation not using persistent indexes but reordering
             // the container directly
-            updateFromPersistentIndexes();
+            updateFromPersistentIndexes(model);
         });
 
         QObject::connect(model, &QAbstractItemModel::layoutAboutToBeChanged,
@@ -80,9 +80,9 @@ public:
         });
 
         QObject::connect(model, &QAbstractItemModel::layoutChanged,
-                         m_ctx.get(), [this]
+                         m_ctx.get(), [this, model]
         {
-            updateFromPersistentIndexes();
+            updateFromPersistentIndexes(model);
         });
 
         QObject::connect(model, &QAbstractItemModel::modelReset,
@@ -128,21 +128,29 @@ private:
             m_persistentIndexes.push_back(model->index(i, 0));
     }
 
-    void updateFromPersistentIndexes()
+    void updateFromPersistentIndexes(QAbstractItemModel* model)
     {
-        auto newCount = std::count_if(
-                    m_persistentIndexes.cbegin(), m_persistentIndexes.cend(),
-                    [] (auto& idx) { return idx.isValid(); });
+        // The new container must be sized from the model, not from the number of
+        // surviving indexes: a layout change may also *add* rows (e.g.
+        // QSortFilterProxyModel::invalidate() after a filter loosens), in which case a
+        // surviving index can land beyond the count of survivors.
+        std::vector<T> newContainer(model == nullptr ? 0 : model->rowCount());
 
-        std::vector<T> newContainer(newCount);
+        const int oldCount = static_cast<int>(m_container.size());
+        const int newCount = static_cast<int>(newContainer.size());
 
         for (int i = 0; i < m_persistentIndexes.size(); i++) {
-            QModelIndex idx = m_persistentIndexes[i];
+            const QModelIndex idx = m_persistentIndexes[i];
 
             if (!idx.isValid())
                 continue;
 
-            newContainer[idx.row()] = std::move(m_container[i]);
+            const int row = idx.row();
+
+            if (i >= oldCount || row < 0 || row >= newCount)
+                continue;
+
+            newContainer[row] = std::move(m_container[i]);
         }
 
         std::swap(m_container, newContainer);

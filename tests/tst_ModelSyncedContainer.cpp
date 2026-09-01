@@ -2,6 +2,7 @@
 #include <QQmlEngine>
 
 #include <QIdentityProxyModel>
+#include <QSortFilterProxyModel>
 #include <QJsonArray>
 #include <QJsonObject>
 
@@ -243,6 +244,46 @@ private slots:
 
         model.removeEverySecond();
         QCOMPARE(container.data(), std::vector<int>({1, 3, 5}));
+    }
+
+    // A layout change may also *grow* the model: QSortFilterProxyModel::invalidate()
+    // re-runs the filter and announces the result as a layout change, so a filter that
+    // loosens adds rows without any insertion signal.
+    void layoutChangeWithGrowthTest()
+    {
+        TestModel model({
+            { "name", { "A", "B", "C", "D", "E", "F" }}
+        });
+
+        class NarrowingProxy : public QSortFilterProxyModel
+        {
+        public:
+            bool acceptAll = false;
+
+        protected:
+            bool filterAcceptsRow(int sourceRow, const QModelIndex&) const override
+            {
+                // Keep the *last* source row, so that after the filter loosens the
+                // survivor lands at a row beyond the old survivor count.
+                return acceptAll || sourceRow == 5;
+            }
+        };
+
+        NarrowingProxy proxy;
+        proxy.setSourceModel(&model);
+        QCOMPARE(proxy.rowCount(), 1);
+
+        ModelSyncedContainer<int> container;
+        container.setModel(&proxy);
+        QCOMPARE(container.size(), 1);
+        container[0] = 42;
+
+        proxy.acceptAll = true;
+        proxy.invalidate();
+
+        QCOMPARE(proxy.rowCount(), 6);
+        QCOMPARE(container.size(), 6);
+        QCOMPARE(container.data(), std::vector<int>({0, 0, 0, 0, 0, 42}));
     }
 
     void modelResetTest()
