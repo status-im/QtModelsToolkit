@@ -10,6 +10,7 @@
 #include "qtmodelstoolkit/modelquery.h"
 #include "qtmodelstoolkit/movablemodel.h"
 #include "qtmodelstoolkit/objectproxymodel.h"
+#include "qtmodelstoolkit/reverseproxymodel.h"
 #include "qtmodelstoolkit/rolesrenamingmodel.h"
 #include "qtmodelstoolkit/snapshotobject.h"
 #include "qtmodelstoolkit/sumaggregator.h"
@@ -29,6 +30,7 @@ void registerQmlTypes() {
     qmlRegisterType<ModelEntry>("QtModelsToolkit", 1, 0, "ModelEntry");
     qmlRegisterType<MovableModel>("QtModelsToolkit", 1, 0, "MovableModel");
     qmlRegisterType<ObjectProxyModel>("QtModelsToolkit", 1, 0, "ObjectProxyModel");
+    qmlRegisterType<ReverseProxyModel>("QtModelsToolkit", 1, 0, "ReverseProxyModel");
     qmlRegisterType<RoleRename>("QtModelsToolkit", 1, 0, "RoleRename");
     qmlRegisterType<RolesRenamingModel>("QtModelsToolkit", 1, 0, "RolesRenamingModel");
     qmlRegisterType<SnapshotObject>("QtModelsToolkit", 1, 0, "SnapshotObject");
