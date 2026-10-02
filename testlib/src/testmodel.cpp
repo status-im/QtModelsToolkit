@@ -75,7 +75,7 @@ void TestModel::appendAndInitRoles(QList<QPair<QString, QVariantList>> data)
     Q_ASSERT(!data.empty());
     Q_ASSERT(!data.at(0).second.empty());
 
-    beginInsertRows(QModelIndex{}, 0, data.at(0).second.size());
+    beginInsertRows(QModelIndex{}, 0, data.at(0).second.size() - 1);
     m_data = std::move(data);
     initRoles();
     endInsertRows();
