@@ -13,6 +13,7 @@ set(SOURCES
   src/movablemodel.cpp
   src/objectproxymodel.cpp
   src/registerqmltypes.cpp
+  src/reverseproxymodel.cpp
   src/rolesrenamingmodel.cpp
   src/singleroleaggregator.cpp
   src/snapshotmodel.cpp
@@ -34,6 +35,7 @@ set(HEADERS
   include/qtmodelstoolkit/movablemodel.h
   include/qtmodelstoolkit/objectproxymodel.h
   include/qtmodelstoolkit/registerqmltypes.h
+  include/qtmodelstoolkit/reverseproxymodel.h
   include/qtmodelstoolkit/rolesrenamingmodel.h
   include/qtmodelstoolkit/singleroleaggregator.h
   include/qtmodelstoolkit/snapshotmodel.h
