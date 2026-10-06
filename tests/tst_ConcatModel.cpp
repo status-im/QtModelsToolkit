@@ -1,3 +1,4 @@
+#include <QAbstractItemModelTester>
 #include <QIdentityProxyModel>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -30,6 +31,34 @@ public:
             return sourceModel()->roleNames();
         return {};
     }
+};
+
+// Changes its row count within layoutAboutToBeChanged/layoutChanged, like
+// QSortFilterProxyModel::invalidate() does.
+class LayoutChangingModel : public QAbstractListModel {
+public:
+    int rowCount(const QModelIndex& parent = {}) const override {
+        return parent.isValid() ? 0 : m_names.size();
+    }
+
+    QVariant data(const QModelIndex& index, int role) const override {
+        if (!index.isValid() || role != Qt::UserRole)
+            return {};
+        return m_names.at(index.row());
+    }
+
+    QHash<int, QByteArray> roleNames() const override {
+        return {{ Qt::UserRole, "name" }};
+    }
+
+    void setNames(const QStringList& names) {
+        emit layoutAboutToBeChanged();
+        m_names = names;
+        emit layoutChanged();
+    }
+
+private:
+    QStringList m_names;
 };
 
 } // unnamed namespace
@@ -2484,6 +2513,58 @@ private slots:
 
         QCOMPARE(model.data(model.index(0), roleForName(roles, "subname")), "a1");
         QCOMPARE(model.data(model.index(1), roleForName(roles, "subname")), "a2");
+    }
+    void layoutChangeWithRowCountChangeBeforeInitializationTest() {
+        // Mirrors an SFPM completed after the concat model: its initial
+        // filtering is reported via layoutAboutToBeChanged/layoutChanged with
+        // a row count change while the concat model is still empty (not
+        // initialized). Rows of all sources must be announced once the concat
+        // model becomes non-empty.
+        LayoutChangingModel sourceModel1;
+        TestModel sourceModel2(QList<QString>{ "name" });
+
+        ConcatModel model;
+        model.classBegin();
+
+        // counts rows as announced to the consumers via the structural signals
+        int signalledRows = 0;
+
+        connect(&model, &QAbstractItemModel::rowsInserted, this,
+                [&signalledRows](const QModelIndex&, int first, int last) {
+            signalledRows += last - first + 1;
+        });
+        connect(&model, &QAbstractItemModel::rowsRemoved, this,
+                [&signalledRows](const QModelIndex&, int first, int last) {
+            signalledRows -= last - first + 1;
+        });
+        connect(&model, &QAbstractItemModel::modelReset, this,
+                [&signalledRows, &model] { signalledRows = model.rowCount(); });
+
+        QAbstractItemModelTester tester(
+                    &model, QAbstractItemModelTester::FailureReportingMode::QtTest);
+
+        QQmlListProperty<SourceModel> sources = model.sources();
+        SourceModel sm1, sm2;
+        sm1.setModel(&sourceModel1);
+        sm2.setModel(&sourceModel2);
+        sources.append(&sources, &sm1);
+        sources.append(&sources, &sm2);
+
+        model.componentComplete();
+        QCOMPARE(model.rowCount(), 0);
+
+        sourceModel1.setNames({ "A", "B" });
+        QCOMPARE(signalledRows, model.rowCount());
+
+        sourceModel2.append({ "C" });
+
+        QCOMPARE(model.rowCount(), 3);
+        QCOMPARE(signalledRows, 3);
+
+        auto roles = model.roleNames();
+        QCOMPARE(model.data(model.index(0), roleForName(roles, "name")), "A");
+        QCOMPARE(model.data(model.index(1), roleForName(roles, "name")), "B");
+        QCOMPARE(model.data(model.index(2), roleForName(roles, "name")), "C");
     }
 };
 

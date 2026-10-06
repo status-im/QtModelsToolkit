@@ -408,6 +408,12 @@ void ConcatModel::componentComplete()
             if (model == nullptr)
                 return;
 
+            if (!m_initialized) {
+                initializeIfNotEmpty();
+                connectModelSlots(i, model);
+                return;
+            }
+
             auto rowCount = model->rowCount();
 
             if (rowCount > 0) {
@@ -416,14 +422,7 @@ void ConcatModel::componentComplete()
                 beginInsertRows({}, prefix, prefix + rowCount - 1);
 
                 m_rowCounts[i] = rowCount;
-
-                if (!m_initialized) {
-                    initRoles();
-                    initRolesMapping();
-                    m_initialized = true;
-                } else {
-                    initRolesMapping(i, model);
-                }
+                initRolesMapping(i, model);
 
                 endInsertRows();
             }
@@ -448,6 +447,16 @@ void ConcatModel::componentComplete()
     }
 
     initAllModelsSlots();
+    initializeIfNotEmpty();
+}
+
+void ConcatModel::initializeIfNotEmpty(bool asReset)
+{
+    Q_ASSERT(!m_initialized);
+
+    // Before initialization the model is empty for the consumers, so the
+    // sources' granular signals are not forwarded. Once any source has rows,
+    // all of them are announced at once.
     fetchRowCounts();
 
     auto count = rowCountInternal();
@@ -455,13 +464,19 @@ void ConcatModel::componentComplete()
     if (count == 0)
         return;
 
-    beginInsertRows({}, 0, count - 1);
+    if (asReset)
+        beginResetModel();
+    else
+        beginInsertRows({}, 0, count - 1);
 
     initRoles();
     initRolesMapping();
     m_initialized = true;
 
-    endInsertRows();
+    if (asReset)
+        endResetModel();
+    else
+        endInsertRows();
 }
 
 std::pair<SourceModel*, int> ConcatModel::sourceForIndex(int index) const
@@ -582,6 +597,9 @@ void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
     connect(model, &QAbstractItemModel::rowsAboutToBeInserted, this,
             [this, index](const QModelIndex &/*parent*/, int first, int last)
     {
+        if (!m_initialized)
+            return;
+
         auto prefix = this->countPrefix(index);
         this->beginInsertRows({}, first + prefix, last + prefix);
     });
@@ -589,15 +607,15 @@ void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
     connect(model, &QAbstractItemModel::rowsInserted, this,
             [this, model, index](const QModelIndex &/*parent*/, int first, int last)
     {
+        if (!m_initialized) {
+            initializeIfNotEmpty();
+            return;
+        }
+
         m_rowCounts[index] += last - first + 1;
 
-        if (!m_initialized) {
-            initRoles();
-            initRolesMapping();
-            m_initialized = true;
-        } else if (!m_rolesMappingInitializationFlags[index]) {
+        if (!m_rolesMappingInitializationFlags[index])
             initRolesMapping(index, model);
-        }
 
         this->endInsertRows();
     });
@@ -605,6 +623,9 @@ void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
     connect(model, &QAbstractItemModel::rowsAboutToBeRemoved, this,
             [this, index](const QModelIndex &/*parent*/, int first, int last)
     {
+        if (!m_initialized)
+            return;
+
         auto prefix = this->countPrefix(index);
         this->beginRemoveRows({}, first + prefix, last + prefix);
     });
@@ -612,6 +633,9 @@ void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
     connect(model, &QAbstractItemModel::rowsRemoved, this,
             [this, index](const QModelIndex &/*parent*/, int first, int last)
     {
+        if (!m_initialized)
+            return;
+
         m_rowCounts[index] -= last - first + 1;
         this->endRemoveRows();
     });
@@ -621,6 +645,9 @@ void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
                 const QModelIndex&, int sourceStart, int sourceEnd,
                 const QModelIndex&, int destinationRow)
     {
+        if (!m_initialized)
+            return;
+
         auto prefix = this->countPrefix(index);
         this->beginMoveRows({}, sourceStart + prefix, sourceEnd + prefix,
                             {}, destinationRow + prefix);
@@ -628,12 +655,18 @@ void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
 
     connect(model, &QAbstractItemModel::rowsMoved, this, [this]
     {
+        if (!m_initialized)
+            return;
+
         this->endMoveRows();
     });
 
     connect(model, &QAbstractItemModel::layoutAboutToBeChanged, this,
             [this, model, index]
     {
+        if (!m_initialized)
+            return;
+
         emit this->layoutAboutToBeChanged();
 
         const auto persistentIndexes = persistentIndexList();
@@ -657,6 +690,11 @@ void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
 
     connect(model, &QAbstractItemModel::layoutChanged, this, [this, model, index]
     {
+        if (!m_initialized) {
+            initializeIfNotEmpty();
+            return;
+        }
+
         auto prefix = this->countPrefix(index);
         auto oldCount = m_rowCounts[index];
         auto newCount = model->rowCount();
@@ -718,23 +756,7 @@ void ConcatModel::connectModelSlots(int index, QAbstractItemModel *model)
         auto count = model->rowCount();
 
         if (!m_initialized) {
-            if (count != 0) {
-                if (m_propagateResets)
-                    this->beginResetModel();
-                else
-                    this->beginInsertRows({}, 0, count - 1);
-
-                initRoles();
-                initRolesMapping();
-                m_initialized = true;
-
-                m_rowCounts[index] = count;
-
-                if (m_propagateResets)
-                    this->endResetModel();
-                else
-                    this->endInsertRows();
-            }
+            initializeIfNotEmpty(m_propagateResets);
         } else {
             if (m_propagateResets) {
                 initRolesMapping(index, model);
