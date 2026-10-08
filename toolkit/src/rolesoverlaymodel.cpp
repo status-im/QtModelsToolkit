@@ -20,9 +20,9 @@ namespace qtmt {
     value return the default.
 
     Values are kept only for keys present in the source model. They follow rows
-    when moved, and are dropped when the key is gone from the source (row
-    removed, reset, layout change or key change). Keys are expected to be
-    unique.
+    when moved, and are dropped when the key is gone from the source after a
+    row removal, reset or layout change (a key changed in place is not pruned
+    until then). Keys are expected to be unique.
 
     \qml
     RolesOverlayModel {
@@ -246,11 +246,19 @@ void RolesOverlayModel::setSourceModel(QAbstractItemModel* model)
             m_removedKeys.clear();
         });
 
+        // A key change may change the overlay values of the row. No pruning
+        // here: proxies often re-send all roles (key included) on every
+        // change, so a scan would cost O(rows) per update.
         connect(model, &QAbstractItemModel::dataChanged, this,
-                [this](const QModelIndex&, const QModelIndex&,
+                [this](const QModelIndex& topLeft, const QModelIndex& bottomRight,
                        const QVector<int>& roles) {
-            if (roles.isEmpty() || roles.contains(m_keyRoleId))
-                pruneToPresentKeys();
+            if (m_values.isEmpty() || m_overlayRoles.isEmpty())
+                return;
+            if (!roles.isEmpty() && !roles.contains(m_keyRoleId))
+                return;
+
+            emit dataChanged(mapFromSource(topLeft), mapFromSource(bottomRight),
+                             m_overlayRoles.keys().toVector());
         });
         connect(model, &QAbstractItemModel::modelReset,
                 this, &RolesOverlayModel::pruneToPresentKeys);
@@ -385,6 +393,10 @@ bool RolesOverlayModel::emitOverlayChanged(const QSet<QString>& keys,
         if (first == -1)
             first = row;
         last = row;
+
+        // keys are unique
+        if (keys.size() == 1)
+            break;
     }
 
     if (first == -1)

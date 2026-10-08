@@ -14,8 +14,8 @@ namespace qtmt {
  * written via set() are stored per key, not per row, so no per-row objects or
  * state are created and sorting/filtering on those roles stays cheap. Values
  * are kept only for keys present in the source: they follow rows when moved,
- * and are dropped when the row leaves the source. Keys are expected to be
- * unique.
+ * and are dropped once the key is gone after a removal, reset or layout
+ * change. Keys are expected to be unique.
  */
 class RolesOverlayModel : public QIdentityProxyModel
 {

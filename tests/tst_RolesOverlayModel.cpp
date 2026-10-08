@@ -1,4 +1,5 @@
 #include <QAbstractItemModelTester>
+#include <QIdentityProxyModel>
 #include <QRegularExpression>
 #include <QSignalSpy>
 #include <QTest>
@@ -21,6 +22,21 @@ QVariant value(const QAbstractItemModel& model, int row, const QByteArray& role)
 {
     return model.data(model.index(row, 0), roleId(model, role));
 }
+
+// counts reads of a single role, to check the per-update cost of the overlay
+class RoleReadsCounter : public QIdentityProxyModel
+{
+public:
+    int role = -1;
+    mutable int reads = 0;
+
+    QVariant data(const QModelIndex& index, int r) const override
+    {
+        if (r == role)
+            ++reads;
+        return QIdentityProxyModel::data(index, r);
+    }
+};
 
 } // unnamed namespace
 
@@ -166,15 +182,102 @@ private slots:
     void sourceKeyChangeIsFollowed()
     {
         m_model->set("b", "pinned", true);
-
         const auto keyRole = roleId(*m_source, "key");
-        m_source->update(0, keyRole, "b2");
-        QCOMPARE(m_model->get("b", "pinned"), QVariant(true));
+        const auto overlayRoles = QVector<int>{ roleId(*m_model, "pinned"),
+                                                roleId(*m_model, "timestamp") };
+        QSignalSpy spy(m_model.get(), &QAbstractItemModel::dataChanged);
 
-        // key gone from the source: value dropped
+        // row 0 takes over key "b": its overlay values change, consumers notified
+        m_source->update(0, keyRole, "b");
+        QCOMPARE(value(*m_model, 0, "pinned"), QVariant(true));
+
+        const auto overlaySignal = std::find_if(spy.cbegin(), spy.cend(), [&](auto& args) {
+            auto roles = args.at(2).template value<QVector<int>>();
+            std::sort(roles.begin(), roles.end());
+            auto expected = overlayRoles;
+            std::sort(expected.begin(), expected.end());
+            return args.at(0).toModelIndex().row() == 0
+                    && args.at(1).toModelIndex().row() == 0 && roles == expected;
+        });
+        QVERIFY(overlaySignal != spy.cend());
+
+        // key changed in place is not pruned immediately (no scan per update)
+        m_source->update(0, keyRole, "a");
         m_source->update(1, keyRole, "x");
-        QVERIFY(m_model->entries().isEmpty());
         QCOMPARE(value(*m_model, 1, "pinned"), QVariant(false));
+        QCOMPARE(m_model->entries().size(), 1);
+
+        // ... but on the next structural change
+        m_source->invert();
+        QVERIFY(m_model->entries().isEmpty());
+    }
+
+    void noOverlaySignalOnKeyChangeWithoutValues()
+    {
+        QSignalSpy spy(m_model.get(), &QAbstractItemModel::dataChanged);
+        m_source->update(0, roleId(*m_source, "key"), "z");
+
+        // only the forwarded source change
+        QCOMPARE(spy.count(), 1);
+        QCOMPARE(spy.at(0).at(2).value<QVector<int>>(),
+                 QVector<int>{ roleId(*m_source, "key") });
+    }
+
+    void structuralChangesAreSignalled()
+    {
+        m_model->set("b", "pinned", true);
+
+        QSignalSpy layoutSpy(m_model.get(), &QAbstractItemModel::layoutChanged);
+        m_source->invert();
+        QCOMPARE(layoutSpy.count(), 1);
+        QCOMPARE(value(*m_model, 1, "key"), QVariant("b"));
+        QCOMPARE(value(*m_model, 1, "pinned"), QVariant(true));
+
+        QSignalSpy resetSpy(m_model.get(), &QAbstractItemModel::modelReset);
+        m_source->reset({ { "key", { "x", "b" }}, { "name", { "X", "B" }} });
+        QCOMPARE(resetSpy.count(), 1);
+        QCOMPARE(value(*m_model, 0, "pinned"), QVariant(false));
+        QCOMPARE(value(*m_model, 1, "pinned"), QVariant(true));
+
+        QSignalSpy removeSpy(m_model.get(), &QAbstractItemModel::rowsRemoved);
+        m_source->remove(1);
+        QCOMPARE(removeSpy.count(), 1);
+        QVERIFY(m_model->entries().isEmpty());
+    }
+
+    // Updates of the source must not scan all keys, also when values are set
+    // and the update re-sends the key role (as SFPM proxy roles do).
+    void sourceUpdatesDontScanKeys()
+    {
+        constexpr int count = 1000;
+        QVariantList keys, names;
+        for (int i = 0; i < count; i++) {
+            keys << QString::number(i);
+            names << QString("name %1").arg(i);
+        }
+
+        TestModel source({ { "key", keys }, { "name", names } });
+        RoleReadsCounter counter;
+        counter.setSourceModel(&source);
+        counter.role = roleId(source, "key");
+
+        RolesOverlayModel model;
+        model.setKeyRole("key");
+        model.setDefaults({ { "pinned", false } });
+        model.setSourceModel(&counter);
+
+        model.set("10", "pinned", true);
+
+        counter.reads = 0;
+        for (int i = 0; i < count; i++)
+            source.update(i, counter.role, QString::number(i));
+
+        QCOMPARE(counter.reads, 0);
+
+        // single key change: stops at the first match
+        counter.reads = 0;
+        model.set("10", "pinned", false);
+        QCOMPARE(counter.reads, 11);
     }
 
     void resettingToDefaultDropsEntry()
