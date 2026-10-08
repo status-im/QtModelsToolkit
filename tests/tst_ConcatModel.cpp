@@ -2514,16 +2514,31 @@ private slots:
         QCOMPARE(model.data(model.index(0), roleForName(roles, "subname")), "a1");
         QCOMPARE(model.data(model.index(1), roleForName(roles, "subname")), "a2");
     }
+    void layoutChangeWithRowCountChangeBeforeInitializationTest_data() {
+        QTest::addColumn<QString>("secondSourceChange");
+        QTest::addColumn<bool>("propagateResets");
+
+        QTest::newRow("insertion") << "insertion" << false;
+        QTest::newRow("model swap") << "swap" << false;
+        QTest::newRow("reset") << "reset" << false;
+        QTest::newRow("reset, propagated") << "reset" << true;
+    }
+
     void layoutChangeWithRowCountChangeBeforeInitializationTest() {
         // Mirrors an SFPM completed after the concat model: its initial
         // filtering is reported via layoutAboutToBeChanged/layoutChanged with
         // a row count change while the concat model is still empty (not
         // initialized). Rows of all sources must be announced once the concat
-        // model becomes non-empty.
+        // model becomes non-empty, whichever path makes it non-empty.
+        QFETCH(QString, secondSourceChange);
+        QFETCH(bool, propagateResets);
+
         LayoutChangingModel sourceModel1;
         TestModel sourceModel2(QList<QString>{ "name" });
+        TestModel replacement(QList<QPair<QString, QVariantList>>{ { "name", { "C" }} });
 
         ConcatModel model;
+        model.setPropagateResets(propagateResets);
         model.classBegin();
 
         // counts rows as announced to the consumers via the structural signals
@@ -2556,7 +2571,12 @@ private slots:
         sourceModel1.setNames({ "A", "B" });
         QCOMPARE(signalledRows, model.rowCount());
 
-        sourceModel2.append({ "C" });
+        if (secondSourceChange == "insertion")
+            sourceModel2.append({ "C" });
+        else if (secondSourceChange == "swap")
+            sm2.setModel(&replacement);
+        else
+            sourceModel2.reset({ { "name", { "C" }} });
 
         QCOMPARE(model.rowCount(), 3);
         QCOMPARE(signalledRows, 3);
@@ -2565,6 +2585,65 @@ private slots:
         QCOMPARE(model.data(model.index(0), roleForName(roles, "name")), "A");
         QCOMPARE(model.data(model.index(1), roleForName(roles, "name")), "B");
         QCOMPARE(model.data(model.index(2), roleForName(roles, "name")), "C");
+    }
+
+    void uninitializedPathsWithoutHiddenRowsTest_data() {
+        QTest::addColumn<QString>("change");
+        QTest::addColumn<bool>("propagateResets");
+
+        QTest::newRow("model swap") << "swap" << false;
+        QTest::newRow("reset") << "reset" << false;
+        QTest::newRow("reset, propagated") << "reset" << true;
+    }
+
+    // The uninitialized model-swap and model-reset paths on their own (no rows
+    // hidden by an earlier layout change).
+    void uninitializedPathsWithoutHiddenRowsTest() {
+        QFETCH(QString, change);
+        QFETCH(bool, propagateResets);
+
+        TestModel sourceModel1(QList<QString>{ "name" });
+        TestModel sourceModel2(QList<QString>{ "name" });
+        TestModel replacement(QList<QPair<QString, QVariantList>>{ { "name", { "C", "D" }} });
+
+        ConcatModel model;
+        model.setPropagateResets(propagateResets);
+        model.classBegin();
+
+        QAbstractItemModelTester tester(
+                    &model, QAbstractItemModelTester::FailureReportingMode::QtTest);
+        QSignalSpy insertSpy(&model, &QAbstractItemModel::rowsInserted);
+        QSignalSpy resetSpy(&model, &QAbstractItemModel::modelReset);
+
+        QQmlListProperty<SourceModel> sources = model.sources();
+        SourceModel sm1, sm2;
+        sm1.setModel(&sourceModel1);
+        sm2.setModel(&sourceModel2);
+        sources.append(&sources, &sm1);
+        sources.append(&sources, &sm2);
+
+        model.componentComplete();
+        QCOMPARE(model.rowCount(), 0);
+
+        if (change == "swap")
+            sm2.setModel(&replacement);
+        else
+            sourceModel2.reset({ { "name", { "C", "D" }} });
+
+        QCOMPARE(model.rowCount(), 2);
+
+        if (change == "reset" && propagateResets) {
+            QCOMPARE(resetSpy.count(), 1);
+            QCOMPARE(insertSpy.count(), 0);
+        } else {
+            QCOMPARE(insertSpy.count(), 1);
+            QCOMPARE(insertSpy.at(0).at(1).toInt(), 0);
+            QCOMPARE(insertSpy.at(0).at(2).toInt(), 1);
+        }
+
+        auto roles = model.roleNames();
+        QCOMPARE(model.data(model.index(0), roleForName(roles, "name")), "C");
+        QCOMPARE(model.data(model.index(1), roleForName(roles, "name")), "D");
     }
 };
 
