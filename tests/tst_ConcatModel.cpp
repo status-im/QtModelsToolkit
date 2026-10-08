@@ -2514,6 +2514,7 @@ private slots:
         QCOMPARE(model.data(model.index(0), roleForName(roles, "subname")), "a1");
         QCOMPARE(model.data(model.index(1), roleForName(roles, "subname")), "a2");
     }
+
     void layoutChangeWithRowCountChangeBeforeInitializationTest_data() {
         QTest::addColumn<QString>("secondSourceChange");
         QTest::addColumn<bool>("propagateResets");
