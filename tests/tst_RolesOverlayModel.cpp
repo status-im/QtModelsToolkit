@@ -212,6 +212,16 @@ private slots:
         QVERIFY(m_model->entries().isEmpty());
     }
 
+    void keyChangedInPlaceIsPrunedOnRowRemoval()
+    {
+        m_model->set("b", "pinned", true);
+
+        m_source->update(1, roleId(*m_source, "key"), "x");
+        m_source->remove(1);
+
+        QVERIFY(m_model->entries().isEmpty());
+    }
+
     void noOverlaySignalOnKeyChangeWithoutValues()
     {
         QSignalSpy spy(m_model.get(), &QAbstractItemModel::dataChanged);

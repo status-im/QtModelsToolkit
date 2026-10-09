@@ -217,34 +217,12 @@ void RolesOverlayModel::setSourceModel(QAbstractItemModel* model)
         disconnect(sourceModel(), nullptr, this, nullptr);
 
     m_values.clear();
-    m_removedKeys.clear();
 
     if (model != nullptr) {
-        connect(model, &QAbstractItemModel::rowsAboutToBeRemoved, this,
-                [this](const QModelIndex& parent, int first, int last) {
-            if (parent.isValid() || m_values.isEmpty())
-                return;
-
-            for (int row = first; row <= last; row++) {
-                auto key = keyAt(row);
-
-                if (m_values.contains(key))
-                    m_removedKeys.insert(key);
-            }
-        });
-
-        connect(model, &QAbstractItemModel::rowsRemoved, this, [this] {
-            if (m_removedKeys.isEmpty())
-                return;
-
-            const auto present = presentKeys();
-
-            for (const auto& key : std::as_const(m_removedKeys))
-                if (!present.contains(key))
-                    m_values.remove(key);
-
-            m_removedKeys.clear();
-        });
+        // Full scan: a removed row's key may have been changed in place, so
+        // keys stored for it can't be captured on removal.
+        connect(model, &QAbstractItemModel::rowsRemoved,
+                this, &RolesOverlayModel::pruneToPresentKeys);
 
         // A key change may change the overlay values of the row. No pruning
         // here: proxies often re-send all roles (key included) on every

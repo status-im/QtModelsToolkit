@@ -72,7 +72,6 @@ private:
     int m_keyRoleId = -1;
 
     QHash<QString, QVariantMap> m_values;
-    QSet<QString> m_removedKeys;
 };
 
 } // namespace qtmt
