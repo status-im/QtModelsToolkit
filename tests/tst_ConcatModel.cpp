@@ -2646,6 +2646,45 @@ private slots:
         QCOMPARE(model.data(model.index(0), roleForName(roles, "name")), "C");
         QCOMPARE(model.data(model.index(1), roleForName(roles, "name")), "D");
     }
+
+    // Initialization triggered by a model swap of the first source must keep
+    // the following sources tracked.
+    void sourcesAfterInitializingSwapAreTrackedTest() {
+        TestModel sourceModel1(QList<QString>{ "name" });
+        TestModel sourceModel2(QList<QString>{ "name" });
+        TestModel sourceModel3(QList<QString>{ "name" });
+        TestModel replacement(QList<QPair<QString, QVariantList>>{ { "name", { "A" }} });
+
+        ConcatModel model;
+        model.classBegin();
+
+        QAbstractItemModelTester tester(
+                    &model, QAbstractItemModelTester::FailureReportingMode::QtTest);
+
+        QQmlListProperty<SourceModel> sources = model.sources();
+        SourceModel sm1, sm2, sm3;
+        sm1.setModel(&sourceModel1);
+        sm2.setModel(&sourceModel2);
+        sm3.setModel(&sourceModel3);
+        sources.append(&sources, &sm1);
+        sources.append(&sources, &sm2);
+        sources.append(&sources, &sm3);
+
+        model.componentComplete();
+        sm1.setModel(&replacement);
+        QCOMPARE(model.rowCount(), 1);
+
+        QSignalSpy insertSpy(&model, &QAbstractItemModel::rowsInserted);
+        sourceModel2.append({ "B" });
+        sourceModel3.append({ "C" });
+
+        QCOMPARE(model.rowCount(), 3);
+        QCOMPARE(insertSpy.count(), 2);
+
+        auto roles = model.roleNames();
+        QCOMPARE(model.data(model.index(1), roleForName(roles, "name")), "B");
+        QCOMPARE(model.data(model.index(2), roleForName(roles, "name")), "C");
+    }
 };
 
 QTEST_MAIN(TestConcatModel)
