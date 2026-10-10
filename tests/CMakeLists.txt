@@ -85,3 +85,7 @@ add_test(NAME SortFilterProxyModelTest COMMAND SortFilterProxyModelTest)
 add_executable(ReverseProxyModelTest tst_ReverseProxyModel.cpp)
 target_link_libraries(ReverseProxyModelTest ${PROJECT_NAME} ${PROJECT_NAME}TestLib)
 add_test(NAME ReverseProxyModelTest COMMAND ReverseProxyModelTest)
+
+add_executable(RolesOverlayModelTest tst_RolesOverlayModel.cpp)
+target_link_libraries(RolesOverlayModelTest ${PROJECT_NAME} ${PROJECT_NAME}TestLib)
+add_test(NAME RolesOverlayModelTest COMMAND RolesOverlayModelTest)

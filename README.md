@@ -47,6 +47,10 @@ Online documentation can be found here: https://status-im.github.io/QtModelsTool
   A proxy model that allows editing and tracking of changes independently from
   the source model in a very efficient way. Also allows to delete rows.
   
+- **RolesOverlayModel**
+  A proxy model adding writable roles with default values, stored per value of
+  a key role (not per row), so sorting/filtering on them stays cheap.
+
 - **RolesRenamingModel**
   A proxy model that allows easily rename model roles.
 
