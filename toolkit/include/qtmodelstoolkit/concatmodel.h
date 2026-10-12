@@ -103,6 +103,7 @@ private:
     int rowCountInternal() const;
     int countPrefix(int sourceIndex) const;
     void fetchRowCounts();
+    void initializeIfNotEmpty(bool asReset = false);
 
     QVector<int> mapFromSourceRoles(int sourceIndex,
                                     const QVector<int>& sourceRoles) const;
