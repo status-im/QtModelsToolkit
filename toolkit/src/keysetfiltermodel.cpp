@@ -2,6 +2,30 @@
 
 namespace qtmt {
 
+namespace {
+
+// Reset rather than notify rows incrementally when the swapped sets differ by
+// at least this many keys...
+constexpr qsizetype ResetMinChangedKeys = 64;
+// ...and by at least 1/ResetSourceFraction of the source rows.
+constexpr qsizetype ResetSourceFraction = 8;
+
+qsizetype symmetricDifferenceSize(const QSet<QString>& a, const QSet<QString>& b)
+{
+    const auto& smaller = a.size() < b.size() ? a : b;
+    const auto& larger = a.size() < b.size() ? b : a;
+
+    qsizetype common = 0;
+
+    for (const auto& key : smaller)
+        if (larger.contains(key))
+            common++;
+
+    return a.size() + b.size() - 2 * common;
+}
+
+} // unnamed namespace
+
 /*!
     \qmltype KeySetFilterModel
     \inherits QSortFilterProxyModel
@@ -17,6 +41,13 @@ namespace qtmt {
     Assigning \l keys swaps the whole set and re-filters the model in one pass.
     Rows inserted to the source, and rows whose key changes, are filtered as
     they come.
+
+    A swap is notified with one rowsRemoved/rowsInserted pair per contiguous
+    run of changed rows, which for interleaved sets (e.g. members of two
+    channels) is close to one pair per changed row. When the sets differ by
+    at least 64 keys and by at least 1/8 of the source row count, the swap is
+    notified with a single model reset instead, which drops persistent
+    indexes and selection of the proxy.
 
     \qml
     KeySetFilterModel {
@@ -78,10 +109,23 @@ void KeySetFilterModel::setKeys(const QStringList& keys)
     if (m_keys == set)
         return;
 
-    beginKeysFilterChange();
+    const auto source = sourceModel();
+    const auto changed = symmetricDifferenceSize(m_keys, set);
+    const bool reset = source != nullptr && changed >= ResetMinChangedKeys
+            && changed * ResetSourceFraction >= source->rowCount();
+
+    if (reset)
+        beginResetModel();
+    else
+        beginKeysFilterChange();
+
     m_keyList = keys;
     m_keys = std::move(set);
-    endKeysFilterChange();
+
+    if (reset)
+        endResetModel();
+    else
+        endKeysFilterChange();
 
     emit keysChanged();
 }

@@ -3,6 +3,7 @@
 #include <QSignalSpy>
 #include <QTest>
 
+#include <functional>
 #include <memory>
 
 #include <qtmodelstoolkit/keysetfiltermodel.h>
@@ -419,6 +420,121 @@ private slots:
 
         QCOMPARE(rows, count / 2);
         qInfo("5k rows, 2.5k keys, filtered once: %.3f ms", elapsed / 1e6);
+    }
+
+    void largeInterleavedSwapResets()
+    {
+        // two channels sharing every third member, the others interleaved:
+        // incrementally it's one rowsRemoved/rowsInserted per changed row
+        const auto result = swap(5000, [](int i) { return i % 3 != 2; },
+                                 [](int i) { return i % 3 != 1; });
+
+        qInfo("5k rows, interleaved swap: %d removed, %d inserted, %d reset, "
+              "%.3f ms", result.removed, result.inserted, result.resets,
+              result.elapsed / 1e6);
+
+        QCOMPARE(result.resets, 1);
+        QCOMPARE(result.removed, 0);
+        QCOMPARE(result.inserted, 0);
+    }
+
+    void smallSwapIsIncremental()
+    {
+        // 100 keys changed out of 5k rows, below 1/8 of the source
+        const auto result = swap(5000, [](int i) { return i < 2000; },
+                                 [](int i) { return i < 1950 || (i >= 2000 && i < 2050); });
+
+        QCOMPARE(result.resets, 0);
+        QCOMPARE(result.removed, 1);
+        QCOMPARE(result.inserted, 1);
+    }
+
+    void swapResetThreshold()
+    {
+        // 64 keys changed: at least 1/8 of 100 rows
+        auto result = swap(100, [](int i) { return i < 32; },
+                           [](int i) { return i >= 32 && i < 64; });
+
+        QCOMPARE(result.resets, 1);
+        QCOMPARE(result.removed, 0);
+        QCOMPARE(result.inserted, 0);
+
+        // 63 keys changed, below the minimum
+        result = swap(100, [](int i) { return i < 32; },
+                      [](int i) { return i >= 32 && i < 63; });
+
+        QCOMPARE(result.resets, 0);
+        QCOMPARE(result.removed, 1);
+        QCOMPARE(result.inserted, 1);
+
+        // 64 keys changed, below 1/8 of 1000 rows
+        result = swap(1000, [](int i) { return i < 32; },
+                      [](int i) { return i >= 32 && i < 64; });
+
+        QCOMPARE(result.resets, 0);
+        QCOMPARE(result.removed, 1);
+        QCOMPARE(result.inserted, 1);
+    }
+
+private:
+    struct SwapResult {
+        int removed = 0;
+        int inserted = 0;
+        int resets = 0;
+        qint64 elapsed = 0;
+    };
+
+    // Swaps the keys of a source of count rows from rows matching inA to rows
+    // matching inB, verifying the resulting rows through a downstream proxy.
+    static SwapResult swap(int count, const std::function<bool(int)>& inA,
+                           const std::function<bool(int)>& inB)
+    {
+        QVariantList keyValues;
+        QStringList setA;
+        QStringList setB;
+        QList<int> rowsB;
+
+        for (int i = 0; i < count; i++) {
+            const auto key = QStringLiteral("0x%1").arg(i, 130, 16, QChar('0'));
+            keyValues << key;
+
+            if (inA(i))
+                setA << key;
+            if (inB(i)) {
+                setB << key;
+                rowsB << i;
+            }
+        }
+
+        TestModel source(QList<QPair<QString, QVariantList>> {{ "key", keyValues }});
+        KeySetFilterModel model;
+        model.setKeys(setA);
+        model.setSourceModel(&source);
+
+        // downstream proxy, as views and further proxies follow the signals
+        QSortFilterProxyModel downstream;
+        downstream.setSourceModel(&model);
+        downstream.rowCount();
+
+        QSignalSpy removedSpy(&model, &QAbstractItemModel::rowsRemoved);
+        QSignalSpy insertedSpy(&model, &QAbstractItemModel::rowsInserted);
+        QSignalSpy resetSpy(&model, &QAbstractItemModel::modelReset);
+
+        QElapsedTimer timer;
+        timer.start();
+        model.setKeys(setB);
+        const auto rows = downstream.rowCount();
+
+        SwapResult result;
+        result.elapsed = timer.nsecsElapsed();
+        result.removed = removedSpy.count();
+        result.inserted = insertedSpy.count();
+        result.resets = resetSpy.count();
+
+        if (rows != rowsB.size() || sourceRows(model) != rowsB)
+            qFatal("swap: wrong rows after the swap");
+
+        return result;
     }
 };
 
