@@ -204,7 +204,7 @@ void KeySetFilterModel::connectSourceModel(QAbstractItemModel* model)
 
 void KeySetFilterModel::beginKeysFilterChange()
 {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
     beginFilterChange();
 #endif
 }
@@ -213,6 +213,8 @@ void KeySetFilterModel::endKeysFilterChange()
 {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     endFilterChange(Direction::Rows);
+#elif QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    invalidateRowsFilter();
 #else
     invalidateFilter();
 #endif

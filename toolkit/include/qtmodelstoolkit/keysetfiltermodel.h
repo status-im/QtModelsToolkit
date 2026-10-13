@@ -48,8 +48,9 @@ protected:
 private:
     void connectSourceModel(QAbstractItemModel* model);
 
-    // begin/endFilterChange() where available (Qt 6.10+, invalidateFilter() is
-    // deprecated there), invalidateFilter() otherwise
+    // beginFilterChange() from Qt 6.9, endFilterChange() from Qt 6.10
+    // (invalidateRowsFilter() before, deprecated in Qt 6.13),
+    // invalidateFilter() on Qt 5
     void beginKeysFilterChange();
     void endKeysFilterChange();
     void invalidateKeyRole();
