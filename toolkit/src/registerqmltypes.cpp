@@ -4,6 +4,7 @@
 #include "qtmodelstoolkit/concatmodel.h"
 #include "qtmodelstoolkit/functionaggregator.h"
 #include "qtmodelstoolkit/groupingmodel.h"
+#include "qtmodelstoolkit/keysetfiltermodel.h"
 #include "qtmodelstoolkit/leftjoinmodel.h"
 #include "qtmodelstoolkit/modelcount.h"
 #include "qtmodelstoolkit/modelentry.h"
@@ -27,6 +28,7 @@ void registerQmlTypes() {
     qmlRegisterType<ConcatModel>("QtModelsToolkit", 1, 0, "ConcatModel");
     qmlRegisterType<FunctionAggregator>("QtModelsToolkit", 1, 0, "FunctionAggregator");
     qmlRegisterType<GroupingModel>("QtModelsToolkit", 1, 0, "GroupingModel");
+    qmlRegisterType<KeySetFilterModel>("QtModelsToolkit", 1, 0, "KeySetFilterModel");
     qmlRegisterType<LeftJoinModel>("QtModelsToolkit", 1, 0, "LeftJoinModel");
     qmlRegisterType<ModelEntry>("QtModelsToolkit", 1, 0, "ModelEntry");
     qmlRegisterType<MovableModel>("QtModelsToolkit", 1, 0, "MovableModel");
