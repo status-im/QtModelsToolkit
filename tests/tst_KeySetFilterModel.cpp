@@ -222,7 +222,10 @@ private slots:
 
         source.appendAndInitRoles({ { "key", { "a", "b", "c" }} });
 
-        QCOMPARE(keys(model), QStringList({ "b" }));
+        // checked via source rows: on Qt 5 the proxy's role names stay empty
+        // after roles are defined this way
+        QCOMPARE(model.rowCount(), 1);
+        QCOMPARE(model.mapToSource(model.index(0, 0)).row(), 1);
     }
 
     void sourceModelChange()
