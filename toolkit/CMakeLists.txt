@@ -6,6 +6,7 @@ set(SOURCES
   src/concatmodel.cpp
   src/functionaggregator.cpp
   src/groupingmodel.cpp
+  src/keysetfiltermodel.cpp
   src/leftjoinmodel.cpp
   src/modelcount.cpp
   src/modelentry.cpp
@@ -28,6 +29,7 @@ set(HEADERS
   include/qtmodelstoolkit/concatmodel.h
   include/qtmodelstoolkit/functionaggregator.h
   include/qtmodelstoolkit/groupingmodel.h
+  include/qtmodelstoolkit/keysetfiltermodel.h
   include/qtmodelstoolkit/leftjoinmodel.h
   include/qtmodelstoolkit/modelcount.h
   include/qtmodelstoolkit/modelentry.h
