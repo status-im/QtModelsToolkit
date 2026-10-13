@@ -29,6 +29,11 @@ namespace qtmt {
 KeySetFilterModel::KeySetFilterModel(QObject* parent)
     : QSortFilterProxyModel{parent}
 {
+    // Connected first, so the role is resolved again before any consumer of
+    // the reset (source reset or source model change) reads the proxy. Reads
+    // during the reset notification may have cached the old role.
+    connect(this, &QAbstractItemModel::modelReset,
+            this, &KeySetFilterModel::invalidateKeyRole);
 }
 
 /*!
@@ -113,8 +118,6 @@ void KeySetFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
 
     m_sourceConnections.clear();
 
-    invalidateKeyRole();
-
     if (sourceModel != nullptr)
         connectSourceModel(sourceModel);
 
@@ -137,18 +140,22 @@ bool KeySetFilterModel::filterAcceptsRow(int sourceRow,
 
 void KeySetFilterModel::connectSourceModel(QAbstractItemModel* model)
 {
-    // Connected before the base class connects its own handlers, so the role is
-    // invalidated before the source rows are filtered again.
-    m_sourceConnections << connect(model, &QAbstractItemModel::modelAboutToBeReset,
-                                   this, &KeySetFilterModel::invalidateKeyRole);
+    // Connected before the base class connects its own handlers, so a missing
+    // key role is resolved again before the affected rows are filtered.
+    const auto invalidateMissingKeyRole = [this] {
+        if (m_keyRoleResolved && m_keyRole == -1)
+            invalidateKeyRole();
+    };
 
     // A model starting with no roles may define them with its first insertion
     // (QTBUG-57971).
     m_sourceConnections << connect(model, &QAbstractItemModel::rowsAboutToBeInserted,
-                                   this, [this] {
-        if (m_keyRole == -1)
-            invalidateKeyRole();
-    });
+                                   this, invalidateMissingKeyRole);
+
+    // QML ListModel adds a role on the first setProperty() of it, notifying
+    // only dataChanged.
+    m_sourceConnections << connect(model, &QAbstractItemModel::dataChanged,
+                                   this, invalidateMissingKeyRole);
 }
 
 void KeySetFilterModel::beginKeysFilterChange()

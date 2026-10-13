@@ -23,6 +23,59 @@ QStringList keys(const QAbstractItemModel& model, const QByteArray& role = "key"
     return result;
 }
 
+QList<int> sourceRows(const QAbstractProxyModel& model)
+{
+    QList<int> result;
+
+    for (int row = 0; row < model.rowCount(); row++)
+        result << model.mapToSource(model.index(row, 0)).row();
+
+    return result;
+}
+
+// Mimics QML ListModel's setProperty: setting a value of an unknown role adds
+// that role and is notified with dataChanged only.
+class GrowingRolesModel : public QAbstractListModel
+{
+public:
+    explicit GrowingRolesModel(int count)
+        : m_rows(count)
+    {
+    }
+
+    int rowCount(const QModelIndex& parent = {}) const override
+    {
+        return parent.isValid() ? 0 : m_rows.size();
+    }
+
+    QHash<int, QByteArray> roleNames() const override
+    {
+        return m_roles;
+    }
+
+    QVariant data(const QModelIndex& index, int role) const override
+    {
+        return m_rows.at(index.row()).value(role);
+    }
+
+    void setProperty(int row, const QByteArray& name, const QVariant& value)
+    {
+        auto role = m_roles.key(name, -1);
+
+        if (role == -1) {
+            role = Qt::UserRole + m_roles.size();
+            m_roles.insert(role, name);
+        }
+
+        m_rows[row].insert(role, value);
+        emit dataChanged(index(row), index(row), { role });
+    }
+
+private:
+    QVector<QHash<int, QVariant>> m_rows;
+    QHash<int, QByteArray> m_roles;
+};
+
 } // unnamed namespace
 
 class TestKeySetFilterModel : public QObject
@@ -184,6 +237,94 @@ private slots:
         // key role gone
         m_source->reset({ { "name", { "A", "B" }} });
         QCOMPARE(m_model->rowCount(), 0);
+    }
+
+    void sourceResetWithDifferentRolesReadMidReset()
+    {
+        // no tester: the proxy mapping is built first while the reset is
+        // being notified, with the source still having the old roles
+        TestModel source(QList<QPair<QString, QVariantList>> {
+            { "key", { "a", "b", "c" }},
+            { "name", { "A", "B", "C" }}
+        });
+        KeySetFilterModel model;
+        model.setKeys({ "b" });
+        model.setSourceModel(&source);
+
+        connect(&model, &QAbstractItemModel::modelAboutToBeReset, &model,
+                [&model] { model.rowCount(); });
+
+        // key role moves to a different role id
+        source.reset({
+            { "name", { "A", "B", "C" }},
+            { "key", { "c", "b", "a" }}
+        });
+
+        QCOMPARE(sourceRows(model), QList<int>({ 1 }));
+    }
+
+    void sourceModelChangeWithDifferentRolesReadMidReset()
+    {
+        TestModel source(QList<QPair<QString, QVariantList>> {
+            { "key", { "a", "b", "c" }},
+            { "name", { "A", "B", "C" }}
+        });
+        TestModel other(QList<QPair<QString, QVariantList>> {
+            { "name", { "A", "B", "C" }},
+            { "key", { "c", "b", "a" }}
+        });
+        KeySetFilterModel model;
+        model.setKeys({ "b" });
+        model.setSourceModel(&source);
+
+        connect(&model, &QAbstractItemModel::modelAboutToBeReset, &model,
+                [&model] { model.rowCount(); });
+
+        model.setSourceModel(&other);
+
+        QCOMPARE(sourceRows(model), QList<int>({ 1 }));
+    }
+
+    void keyRoleAddedByDataChange()
+    {
+        GrowingRolesModel source(3);
+        source.setProperty(0, "name", "A");
+        source.setProperty(1, "name", "B");
+        source.setProperty(2, "name", "C");
+
+        KeySetFilterModel model;
+        model.setKeys({ "b", "c" });
+        model.setSourceModel(&source);
+        QAbstractItemModelTester tester(
+                    &model, QAbstractItemModelTester::FailureReportingMode::QtTest);
+
+        QCOMPARE(model.rowCount(), 0);
+
+        source.setProperty(1, "key", "b");
+        QCOMPARE(sourceRows(model), QList<int>({ 1 }));
+
+        source.setProperty(2, "key", "c");
+        QCOMPARE(sourceRows(model), QList<int>({ 1, 2 }));
+    }
+
+    void keyRoleAddedByDataChangeInverted()
+    {
+        GrowingRolesModel source(3);
+        source.setProperty(0, "name", "A");
+        source.setProperty(1, "name", "B");
+        source.setProperty(2, "name", "C");
+
+        KeySetFilterModel model;
+        model.setKeys({ "b" });
+        model.setInvert(true);
+        model.setSourceModel(&source);
+        QAbstractItemModelTester tester(
+                    &model, QAbstractItemModelTester::FailureReportingMode::QtTest);
+
+        QCOMPARE(model.rowCount(), 3);
+
+        source.setProperty(1, "key", "b");
+        QCOMPARE(sourceRows(model), QList<int>({ 0, 2 }));
     }
 
     void missingRole()
