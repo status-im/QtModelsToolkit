@@ -1,6 +1,7 @@
 #include <QAbstractItemModelTester>
 #include <QElapsedTimer>
 #include <QSignalSpy>
+#include <QStringListModel>
 #include <QTest>
 
 #include <functional>
@@ -212,6 +213,42 @@ private slots:
         m_source->update(3, nameRole, "D2");
         QCOMPARE(spy.count(), 1);
         QCOMPARE(keys(*m_model, "name"), QStringList({ "A", "D2" }));
+    }
+
+    void sourceLayoutChange()
+    {
+        // d, c, b, a
+        m_source->invert();
+        QCOMPARE(keys(*m_model), QStringList({ "d", "b" }));
+
+        m_model->setKeys({ "a", "b" });
+        QCOMPARE(keys(*m_model), QStringList({ "b", "a" }));
+
+        // rows removed with layoutChanged only: c, a
+        m_source->removeEverySecond();
+        QCOMPARE(keys(*m_model), QStringList({ "a" }));
+        QCOMPARE(sourceRows(*m_model), QList<int>({ 1 }));
+    }
+
+    void sourceRowsMove()
+    {
+        QStringListModel source({ "a", "b", "c", "d" });
+        KeySetFilterModel model;
+        model.setKeyRoleName("display");
+        model.setKeys({ "b", "d" });
+        model.setSourceModel(&source);
+        QAbstractItemModelTester tester(
+                    &model, QAbstractItemModelTester::FailureReportingMode::QtTest);
+
+        QCOMPARE(keys(model, "display"), QStringList({ "b", "d" }));
+
+        // d, a, b, c
+        QVERIFY(source.moveRows({}, 3, 1, {}, 0));
+        QCOMPARE(keys(model, "display"), QStringList({ "d", "b" }));
+
+        // a, b, d, c
+        QVERIFY(source.moveRows({}, 0, 1, {}, 3));
+        QCOMPARE(keys(model, "display"), QStringList({ "b", "d" }));
     }
 
     void sourceReset()
