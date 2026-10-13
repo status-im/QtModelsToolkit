@@ -31,6 +31,11 @@ Online documentation can be found here: https://status-im.github.io/QtModelsTool
   Supports joining two models, combining their data based on value of the role
   specified as a joining role. Works like a dynamic LEFT JOIN from SQL.
     
+- **KeySetFilterModel**
+  A filter proxy accepting rows whose key role value is in a set of keys.
+  Costs one hash lookup per row; the whole set is swapped and re-filtered
+  at once.
+
 - **MovableModel**
   A proxy model that allows rows to be reordered without modifying the source
   model.
